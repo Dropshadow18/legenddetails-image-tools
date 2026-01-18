@@ -6,38 +6,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-}
-.container {
-  max-width:1000px;
-  margin:auto;
-  padding:20px;
-}
-.tool {
-  background:#fff;
-  padding:20px;
-  margin-bottom:20px;
-  border-radius:8px;
-}
-label { font-weight:bold; margin-top:10px; display:block; }
-input, textarea, select {
-  width:100%;
-  padding:8px;
-  margin-top:5px;
-}
+body { font-family: Arial, sans-serif; background:#f4f6f8; }
+.container { max-width:1100px; margin:auto; padding:20px; }
+.tool { background:#fff; padding:20px; margin-bottom:20px; border-radius:8px; }
+label { font-weight:bold; display:block; margin-top:10px; }
+input, textarea, select { width:100%; padding:8px; margin-top:5px; }
 .row { display:flex; gap:10px; flex-wrap:wrap; }
-.row > div { flex:1; }
+.row div { flex:1; }
 .colors span {
-  width:25px; height:25px; display:inline-block;
-  cursor:pointer; border:1px solid #000;
+  width:26px; height:26px; display:inline-block;
+  cursor:pointer; border:1px solid #000; margin:2px;
 }
 button {
+  margin-top:15px; padding:12px 20px;
   background:#007bff; color:#fff;
-  padding:12px 20px; border:none;
-  font-size:16px; cursor:pointer;
+  border:none; font-size:16px; cursor:pointer;
 }
+#preview { max-width:100%; margin-top:15px; border:2px solid #ccc; display:none; }
 canvas { display:none; }
 </style>
 </head>
@@ -47,6 +32,7 @@ canvas { display:none; }
 <h1>LegendDetails – Quote Image Tool</h1>
 
 <div class="tool">
+
 <label>1. Post Title</label>
 <input id="title">
 
@@ -58,24 +44,28 @@ canvas { display:none; }
 
 <label>4. Font Style</label>
 <select id="font">
-  <option value="Arial">Arial</option>
-  <option value="Georgia">Georgia</option>
-  <option value="Times New Roman">Times New Roman</option>
-  <option value="Verdana">Verdana</option>
+  <option>Arial</option>
+  <option>Georgia</option>
+  <option>Times New Roman</option>
+  <option>Verdana</option>
 </select>
 
 <label>5. Text Alignment</label>
 <div class="row">
-  <select id="align">
-    <option value="center">Center</option>
-    <option value="left">Left</option>
-    <option value="right">Right</option>
-  </select>
-  <select id="vertical">
-    <option value="middle">Middle</option>
-    <option value="top">Top</option>
-    <option value="bottom">Bottom</option>
-  </select>
+  <div>
+    <select id="align">
+      <option value="center">Center</option>
+      <option value="left">Left</option>
+      <option value="right">Right</option>
+    </select>
+  </div>
+  <div>
+    <select id="vertical">
+      <option value="middle">Middle</option>
+      <option value="top">Top</option>
+      <option value="bottom">Bottom</option>
+    </select>
+  </div>
 </div>
 
 <label>6. Text Style</label>
@@ -88,8 +78,8 @@ canvas { display:none; }
 <label>8. Image Border</label>
 <select id="border">
   <option value="none">None</option>
-  <option value="white">White Border</option>
-  <option value="black">Black Border</option>
+  <option value="white">White</option>
+  <option value="black">Black</option>
 </select>
 
 <label>9. Image Effect</label>
@@ -106,37 +96,57 @@ canvas { display:none; }
   <option value="2400x1350">2400×1350</option>
 </select>
 
-<button onclick="generate()">Download Image</button>
+<button onclick="generatePreview()">Preview Image</button>
+<button onclick="downloadImage()" id="downloadBtn" style="display:none;">
+Download Image
+</button>
+
+<h3>Preview</h3>
+<img id="preview">
+
 </div>
 
 <canvas id="canvas"></canvas>
 </div>
 
 <script>
-const colors = ["#ffffff","#000000","#ff0000","#00ff00","#0000ff","#ffff00","#ff00ff","#00ffff"];
-let selectedColor = "#ffffff";
+const colorList = ["#ffffff","#000000","#ff0000","#00ff00","#0000ff","#ffff00","#ff00ff","#00ffff"];
+let textColor = "#ffffff";
+let finalImage = "";
 
-const colorDiv = document.getElementById("colors");
-colors.forEach(c=>{
+const colors = document.getElementById("colors");
+colorList.forEach(c=>{
   const s=document.createElement("span");
   s.style.background=c;
-  s.onclick=()=>selectedColor=c;
-  colorDiv.appendChild(s);
+  s.onclick=()=>textColor=c;
+  colors.appendChild(s);
 });
 
 function slugify(t){
   return t.toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g,"-");
 }
 
+function generatePreview(){
+  generate(true);
+}
+
+function downloadImage(){
+  const a=document.createElement("a");
+  a.download=slugify(title.value)+".png";
+  a.href=finalImage;
+  a.click();
+}
+
 function generate(){
-  const title = title.value;
-  const quote = document.getElementById("quote").value;
-  const file = bg.files[0];
-  if(!title || !quote || !file){ alert("Fill all fields"); return; }
+  if(!title.value || !quote.value || !bg.files[0]){
+    alert("Please fill all fields");
+    return;
+  }
 
   const [w,h]=size.value.split("x");
-  const c=canvas, ctx=c.getContext("2d");
-  c.width=w; c.height=h;
+  const canvas=document.getElementById("canvas");
+  const ctx=canvas.getContext("2d");
+  canvas.width=w; canvas.height=h;
 
   const img=new Image();
   img.onload=()=>{
@@ -144,26 +154,28 @@ function generate(){
     ctx.drawImage(img,0,0,w,h);
     ctx.filter="none";
 
-    // border
     if(border.value!=="none"){
       ctx.strokeStyle=border.value;
       ctx.lineWidth=20;
       ctx.strokeRect(0,0,w,h);
     }
 
-    let style="";
-    if(bold.checked) style+="bold ";
-    if(italic.checked) style+="italic ";
-    style+=`${Math.floor(w/20)}px ${font.value}`;
-    ctx.font=style;
-    ctx.fillStyle=selectedColor;
+    let fontStyle="";
+    if(bold.checked) fontStyle+="bold ";
+    if(italic.checked) fontStyle+="italic ";
+    fontStyle+=`${Math.floor(w/20)}px ${font.value}`;
+    ctx.font=fontStyle;
+
+    ctx.fillStyle=textColor;
     ctx.textAlign=align.value;
 
     let y=h/2;
-    if(vertical.value==="top") y=100;
-    if(vertical.value==="bottom") y=h-100;
+    if(vertical.value==="top") y=120;
+    if(vertical.value==="bottom") y=h-120;
 
-    wrap(ctx,quote,align.value==="left"?80:align.value==="right"?w-80:w/2,y,w-160,60);
+    wrapText(ctx,quote.value,
+      align.value==="left"?100:align.value==="right"?w-100:w/2,
+      y,w-200,60);
 
     // watermark
     ctx.font="20px Arial";
@@ -171,25 +183,28 @@ function generate(){
     ctx.textAlign="right";
     ctx.fillText("LegendDetails.Blogspot.com",w-20,h-20);
 
-    const a=document.createElement("a");
-    a.download=slugify(title)+".png";
-    a.href=c.toDataURL();
-    a.click();
+    finalImage=canvas.toDataURL("image/png");
+    const preview=document.getElementById("preview");
+    preview.src=finalImage;
+    preview.style.display="block";
+    document.getElementById("downloadBtn").style.display="inline-block";
   };
-  img.src=URL.createObjectURL(file);
+
+  img.src=URL.createObjectURL(bg.files[0]);
 }
 
-function wrap(ctx,text,x,y,maxW,lineH){
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
   const words=text.split(" ");
   let line="", lines=[];
-  words.forEach(w=>{
-    const t=line+w+" ";
-    if(ctx.measureText(t).width>maxW){ lines.push(line); line=w+" "; }
-    else line=t;
-  });
+  for(let i=0;i<words.length;i++){
+    let test=line+words[i]+" ";
+    if(ctx.measureText(test).width>maxWidth && i>0){
+      lines.push(line); line=words[i]+" ";
+    } else line=test;
+  }
   lines.push(line);
-  y-=(lines.length-1)*lineH/2;
-  lines.forEach(l=>{ ctx.fillText(l,x,y); y+=lineH; });
+  y-=(lines.length-1)*lineHeight/2;
+  lines.forEach(l=>{ ctx.fillText(l,x,y); y+=lineHeight; });
 }
 </script>
 </body>
