@@ -2,34 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LegendDetails Quote Image Generator</title>
+<title>LegendDetails Quote Image Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body { font-family: Arial, sans-serif; background:#f4f6f8; }
-.container { max-width:1100px; margin:auto; padding:20px; }
-.tool { background:#fff; padding:20px; margin-bottom:20px; border-radius:8px; }
-label { font-weight:bold; display:block; margin-top:10px; }
-input, textarea, select { width:100%; padding:8px; margin-top:5px; }
-.row { display:flex; gap:10px; flex-wrap:wrap; }
-.row div { flex:1; }
-.colors span {
-  width:26px; height:26px; display:inline-block;
-  cursor:pointer; border:1px solid #000; margin:2px;
-}
-button {
-  margin-top:15px; padding:12px 20px;
-  background:#007bff; color:#fff;
-  border:none; font-size:16px; cursor:pointer;
-}
-#preview { max-width:100%; margin-top:15px; border:2px solid #ccc; display:none; }
-canvas { display:none; }
+body{font-family:Arial;background:#eef1f5}
+.container{max-width:1200px;margin:auto;padding:20px}
+.tool{background:#fff;padding:20px;border-radius:10px;margin-bottom:20px}
+label{font-weight:bold;margin-top:10px;display:block}
+input,textarea,select{width:100%;padding:8px;margin-top:5px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>div{flex:1}
+canvas{display:none}
+#preview{max-width:100%;border:2px solid #ccc;margin-top:15px}
 </style>
 </head>
 
 <body>
 <div class="container">
-<h1>LegendDetails – Quote Image Tool</h1>
+<h1>LegendDetails – Quote Image Studio</h1>
 
 <div class="tool">
 
@@ -39,172 +30,202 @@ canvas { display:none; }
 <label>2. Upload Background Image</label>
 <input type="file" id="bg" accept="image/*">
 
-<label>3. Quote Text (Any Language)</label>
-<textarea id="quote" rows="4"></textarea>
-
-<label>4. Font Style</label>
-<select id="font">
-  <option>Arial</option>
-  <option>Georgia</option>
-  <option>Times New Roman</option>
-  <option>Verdana</option>
+<label>3. Quote Language</label>
+<select id="language" onchange="updateFonts()">
+  <option value="en">English</option>
+  <option value="te">Telugu</option>
+  <option value="hi">Hindi</option>
+  <option value="ta">Tamil</option>
+  <option value="kn">Kannada</option>
 </select>
 
-<label>5. Text Alignment</label>
+<label>4. Quote Text</label>
+<textarea id="quote" rows="4"></textarea>
+
+<label>5. Font Style</label>
+<select id="font"></select>
+
 <div class="row">
-  <div>
-    <select id="align">
-      <option value="center">Center</option>
-      <option value="left">Left</option>
-      <option value="right">Right</option>
-    </select>
-  </div>
-  <div>
-    <select id="vertical">
-      <option value="middle">Middle</option>
-      <option value="top">Top</option>
-      <option value="bottom">Bottom</option>
-    </select>
-  </div>
+<div>
+<label>Text Size</label>
+<input type="range" id="textSize" min="12" max="72" value="40">
+</div>
+<div>
+<label>Line Gap</label>
+<input type="range" id="lineGap" min="20" max="100" value="60">
+</div>
+<div>
+<label>Letter Spacing</label>
+<input type="range" id="spacing" min="0" max="10" value="0">
+</div>
 </div>
 
-<label>6. Text Style</label>
+<label>Text Style</label>
 <input type="checkbox" id="bold"> Bold
 <input type="checkbox" id="italic"> Italic
 
-<label>7. Text Color</label>
-<div class="colors" id="colors"></div>
+<label>Text Color</label>
+<input type="color" id="color" value="#ffffff">
 
-<label>8. Image Border</label>
+<label>Text Alignment</label>
+<div class="row">
+<select id="align">
+  <option value="center">Center</option>
+  <option value="left">Left</option>
+  <option value="right">Right</option>
+</select>
+<select id="vertical">
+  <option value="middle">Middle</option>
+  <option value="top">Top</option>
+  <option value="bottom">Bottom</option>
+</select>
+</div>
+
+<label>Border Style</label>
 <select id="border">
   <option value="none">None</option>
   <option value="white">White</option>
   <option value="black">Black</option>
+  <option value="double">Double</option>
 </select>
 
-<label>9. Image Effect</label>
+<label>Image Effect</label>
 <select id="effect">
   <option value="none">None</option>
-  <option value="grayscale(1)">Grayscale</option>
-  <option value="blur(2px)">Blur</option>
+  <option value="dark">Dark Overlay</option>
+  <option value="light">Light Overlay</option>
+  <option value="vignette">Fade Edges</option>
+  <option value="grayscale">Grayscale</option>
 </select>
 
-<label>10. Image Size</label>
+<label>Image Size</label>
 <select id="size">
   <option value="1200x675">1200×675</option>
   <option value="1600x900">1600×900</option>
   <option value="2400x1350">2400×1350</option>
 </select>
 
-<button onclick="generatePreview()">Preview Image</button>
-<button onclick="downloadImage()" id="downloadBtn" style="display:none;">
-Download Image
-</button>
+<label>Watermark Size</label>
+<input type="range" id="wmSize" min="12" max="72" value="24">
 
-<h3>Preview</h3>
+<button onclick="download()">Download JPG</button>
+
+<h3>Auto Preview</h3>
 <img id="preview">
 
 </div>
-
 <canvas id="canvas"></canvas>
 </div>
 
 <script>
-const colorList = ["#ffffff","#000000","#ff0000","#00ff00","#0000ff","#ffff00","#ff00ff","#00ffff"];
-let textColor = "#ffffff";
-let finalImage = "";
+const fonts={
+en:["Arial","Georgia","Times New Roman","Verdana","Trebuchet MS","Impact","Comic Sans MS","Courier New","Tahoma","Lucida Sans"],
+te:["Noto Sans Telugu","Arial","Verdana","Georgia","Times New Roman"],
+hi:["Noto Sans Devanagari","Arial","Verdana","Georgia","Times New Roman"],
+ta:["Noto Sans Tamil","Arial","Verdana","Georgia","Times New Roman"],
+kn:["Noto Sans Kannada","Arial","Verdana","Georgia","Times New Roman"]
+};
 
-const colors = document.getElementById("colors");
-colorList.forEach(c=>{
-  const s=document.createElement("span");
-  s.style.background=c;
-  s.onclick=()=>textColor=c;
-  colors.appendChild(s);
-});
+function updateFonts(){
+  font.innerHTML="";
+  fonts[language.value].forEach(f=>{
+    const o=document.createElement("option");
+    o.textContent=f;
+    o.value=f;
+    font.appendChild(o);
+  });
+}
+updateFonts();
 
-function slugify(t){
+function slug(t){
   return t.toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g,"-");
 }
 
-function generatePreview(){
-  generate(true);
-}
+document.querySelectorAll("input,textarea,select").forEach(e=>{
+  e.oninput=render;
+});
 
-function downloadImage(){
-  const a=document.createElement("a");
-  a.download=slugify(title.value)+".png";
-  a.href=finalImage;
-  a.click();
-}
-
-function generate(){
-  if(!title.value || !quote.value || !bg.files[0]){
-    alert("Please fill all fields");
-    return;
-  }
+function render(){
+  if(!bg.files[0]) return;
 
   const [w,h]=size.value.split("x");
-  const canvas=document.getElementById("canvas");
-  const ctx=canvas.getContext("2d");
   canvas.width=w; canvas.height=h;
+  const ctx=canvas.getContext("2d");
 
   const img=new Image();
   img.onload=()=>{
-    ctx.filter=effect.value;
     ctx.drawImage(img,0,0,w,h);
-    ctx.filter="none";
+
+    if(effect.value==="dark"){
+      ctx.fillStyle="rgba(0,0,0,0.4)";
+      ctx.fillRect(0,0,w,h);
+    }
+    if(effect.value==="light"){
+      ctx.fillStyle="rgba(255,255,255,0.3)";
+      ctx.fillRect(0,0,w,h);
+    }
+    if(effect.value==="grayscale"){
+      ctx.filter="grayscale(1)";
+      ctx.drawImage(img,0,0,w,h);
+      ctx.filter="none";
+    }
+    if(effect.value==="vignette"){
+      const g=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,w/1.2);
+      g.addColorStop(0,"transparent");
+      g.addColorStop(1,"rgba(0,0,0,0.6)");
+      ctx.fillStyle=g;
+      ctx.fillRect(0,0,w,h);
+    }
 
     if(border.value!=="none"){
-      ctx.strokeStyle=border.value;
-      ctx.lineWidth=20;
+      ctx.lineWidth=border.value==="double"?30:20;
+      ctx.strokeStyle=border.value==="double"?"#fff":"#000";
       ctx.strokeRect(0,0,w,h);
     }
 
-    let fontStyle="";
-    if(bold.checked) fontStyle+="bold ";
-    if(italic.checked) fontStyle+="italic ";
-    fontStyle+=`${Math.floor(w/20)}px ${font.value}`;
-    ctx.font=fontStyle;
-
-    ctx.fillStyle=textColor;
+    let style="";
+    if(bold.checked) style+="bold ";
+    if(italic.checked) style+="italic ";
+    style+=`${textSize.value}px ${font.value}`;
+    ctx.font=style;
+    ctx.fillStyle=color.value;
     ctx.textAlign=align.value;
+    ctx.letterSpacing=spacing.value+"px";
 
     let y=h/2;
     if(vertical.value==="top") y=120;
     if(vertical.value==="bottom") y=h-120;
 
-    wrapText(ctx,quote.value,
-      align.value==="left"?100:align.value==="right"?w-100:w/2,
-      y,w-200,60);
+    wrap(ctx,quote.value,align.value==="left"?100:align.value==="right"?w-100:w/2,y,w-200,lineGap.value);
 
-    // watermark
-    ctx.font="20px Arial";
+    ctx.font=`${wmSize.value}px Arial`;
     ctx.fillStyle="rgba(255,255,255,0.7)";
     ctx.textAlign="right";
-    ctx.fillText("LegendDetails.Blogspot.com",w-20,h-20);
+    ctx.fillText("LegendDetails.BlogSpot.Com",w-20,40);
 
-    finalImage=canvas.toDataURL("image/png");
-    const preview=document.getElementById("preview");
-    preview.src=finalImage;
-    preview.style.display="block";
-    document.getElementById("downloadBtn").style.display="inline-block";
+    preview.src=canvas.toDataURL("image/jpeg",0.95);
   };
-
   img.src=URL.createObjectURL(bg.files[0]);
 }
 
-function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+function wrap(ctx,text,x,y,maxW,lh){
   const words=text.split(" ");
-  let line="", lines=[];
-  for(let i=0;i<words.length;i++){
-    let test=line+words[i]+" ";
-    if(ctx.measureText(test).width>maxWidth && i>0){
-      lines.push(line); line=words[i]+" ";
-    } else line=test;
-  }
+  let line="",lines=[];
+  words.forEach(w=>{
+    let t=line+w+" ";
+    if(ctx.measureText(t).width>maxW){lines.push(line);line=w+" "}
+    else line=t;
+  });
   lines.push(line);
-  y-=(lines.length-1)*lineHeight/2;
-  lines.forEach(l=>{ ctx.fillText(l,x,y); y+=lineHeight; });
+  y-=(lines.length-1)*lh/2;
+  lines.forEach(l=>{ctx.fillText(l,x,y);y+=lh});
+}
+
+function download(){
+  const a=document.createElement("a");
+  a.download=slug(title.value)+".jpg";
+  a.href=canvas.toDataURL("image/jpeg",0.95);
+  a.click();
 }
 </script>
 </body>
