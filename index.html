@@ -5,6 +5,9 @@
 <title>LegendDetails Quote Image Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins&family=Montserrat&family=Playfair+Display&family=Lato&family=Noto+Sans+Telugu&family=Noto+Sans+Devanagari&family=Noto+Sans+Tamil&family=Noto+Sans+Kannada&display=swap" rel="stylesheet">
+
 <style>
 body{font-family:Arial;background:#eef1f5}
 .container{max-width:1200px;margin:auto;padding:20px}
@@ -27,7 +30,7 @@ canvas{display:none}
 <label>Post Title</label>
 <input id="title">
 
-<label>Upload Background Image</label>
+<label>Background Image</label>
 <input type="file" id="bg" accept="image/*">
 
 <label>Quote Language</label>
@@ -48,7 +51,7 @@ canvas{display:none}
 <div class="row">
 <div>
 <label>Text Size</label>
-<input type="range" id="textSize" min="12" max="72" value="40">
+<input type="range" id="textSize" min="16" max="72" value="42">
 </div>
 <div>
 <label>Line Gap</label>
@@ -62,6 +65,18 @@ canvas{display:none}
 
 <label>Text Color</label>
 <input type="color" id="color" value="#ffffff">
+
+<label>Text Shadow</label>
+<select id="shadow">
+<option value="none">None</option>
+<option value="soft">Soft</option>
+<option value="strong">Strong</option>
+<option value="glow">Glow</option>
+</select>
+
+<label>Text Outline</label>
+<input type="checkbox" id="outline"> Enable Outline
+<input type="color" id="outlineColor" value="#000000">
 
 <label>Text Alignment</label>
 <select id="align">
@@ -86,7 +101,7 @@ canvas{display:none}
 
 <button onclick="download()">Download JPG</button>
 
-<h3>Preview</h3>
+<h3>Live Preview</h3>
 <img id="preview">
 
 </div>
@@ -94,17 +109,17 @@ canvas{display:none}
 </div>
 
 <script>
-const fonts={
-en:["Arial","Georgia","Times New Roman","Verdana","Trebuchet MS"],
-te:["Noto Sans Telugu","Arial","Verdana"],
-hi:["Noto Sans Devanagari","Arial","Verdana"],
-ta:["Noto Sans Tamil","Arial","Verdana"],
-kn:["Noto Sans Kannada","Arial","Verdana"]
+const fontMap={
+en:["Poppins","Montserrat","Playfair Display","Lato"],
+te:["Noto Sans Telugu"],
+hi:["Noto Sans Devanagari"],
+ta:["Noto Sans Tamil"],
+kn:["Noto Sans Kannada"]
 };
 
 function loadFonts(){
 font.innerHTML="";
-fonts[language.value].forEach(f=>{
+fontMap[language.value].forEach(f=>{
 const o=document.createElement("option");
 o.value=f; o.textContent=f;
 font.appendChild(o);
@@ -125,7 +140,7 @@ const img=new Image();
 img.onload=()=>{
 ctx.drawImage(img,0,0,w,h);
 
-// font
+// font style
 let style="";
 if(bold.checked) style+="bold ";
 if(italic.checked) style+="italic ";
@@ -134,32 +149,53 @@ ctx.font=style;
 ctx.fillStyle=color.value;
 ctx.textAlign=align.value;
 
-// SAFE LINE HEIGHT (🔥 FIX)
-const minLH = textSize.value * 1.3;
-const lineHeight = Math.max(lineGap.value, minLH);
+// shadow
+ctx.shadowColor="transparent";
+if(shadow.value==="soft"){
+ctx.shadowColor="rgba(0,0,0,0.5)";
+ctx.shadowBlur=10;
+}
+if(shadow.value==="strong"){
+ctx.shadowColor="rgba(0,0,0,0.8)";
+ctx.shadowBlur=15;
+}
+if(shadow.value==="glow"){
+ctx.shadowColor=color.value;
+ctx.shadowBlur=20;
+}
 
-// text block
-const textLines = buildLines(ctx, quote.value, w-200);
+// line height safety
+const lineHeight=Math.max(lineGap.value, textSize.value*1.3);
+const lines=buildLines(ctx,quote.value,w-200);
+const blockHeight=lines.length*lineHeight;
 
-// vertical positioning
 let y;
-const blockHeight = textLines.length * lineHeight;
 if(vertical.value==="top") y=120;
 else if(vertical.value==="bottom") y=h-blockHeight-120;
 else y=(h-blockHeight)/2;
 
-// draw text
-textLines.forEach(line=>{
-ctx.fillText(
-line,
-align.value==="left"?100:align.value==="right"?w-100:w/2,
-y
-);
+const x=align.value==="left"?100:align.value==="right"?w-100:w/2;
+
+// outline first
+if(outline.checked){
+ctx.lineWidth=Math.max(2, textSize.value/10);
+ctx.strokeStyle=outlineColor.value;
+lines.forEach(line=>{
+ctx.strokeText(line,x,y);
+y+=lineHeight;
+});
+y-=(lines.length*lineHeight);
+}
+
+// fill text
+lines.forEach(line=>{
+ctx.fillText(line,x,y);
 y+=lineHeight;
 });
 
 // watermark
-ctx.font="20px Arial";
+ctx.shadowBlur=0;
+ctx.font="20px Poppins";
 ctx.fillStyle="rgba(255,255,255,0.7)";
 ctx.textAlign="right";
 ctx.fillText("LegendDetails.BlogSpot.Com",w-20,40);
@@ -169,7 +205,6 @@ preview.src=canvas.toDataURL("image/jpeg",0.95);
 img.src=URL.createObjectURL(bg.files[0]);
 }
 
-/* ✅ PERFECT MULTILINE HANDLER */
 function buildLines(ctx,text,maxWidth){
 const paragraphs=text.split("\n");
 let lines=[];
