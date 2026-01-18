@@ -2,91 +2,78 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>LegendDetails Quote Image Generator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LegendDetails Image Tools</title>
 
 <style>
 body {
   font-family: Arial, sans-serif;
   background: #f4f6f8;
   margin: 0;
-  padding: 0;
 }
 .container {
   max-width: 900px;
   margin: auto;
   padding: 20px;
 }
-h1 {
-  text-align: center;
-}
 .tool {
   background: #fff;
   padding: 20px;
   margin-bottom: 20px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
-input {
+label {
+  font-weight: bold;
+  display: block;
+  margin-top: 10px;
+}
+input, textarea, select {
   width: 100%;
   padding: 10px;
-  margin-top: 10px;
+  margin-top: 5px;
 }
 button {
-  margin-top: 10px;
-  padding: 10px 15px;
-  cursor: pointer;
-}
-.output {
-  margin-top: 10px;
-  background: #f1f1f1;
-  padding: 10px;
-  border-radius: 4px;
-}
-.copy {
+  margin-top: 15px;
+  padding: 12px 20px;
   background: #007bff;
   color: #fff;
   border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+canvas {
+  display: none;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-  <h1>LegendDetails – Image Tools</h1>
+<h1>LegendDetails – Quote Image Tool</h1>
 
-  <!-- Image Sizes -->
-  <div class="tool">
-    <h2>Image Size Guide (Blogger)</h2>
-    <div class="output">
-      Featured Image: <b>1200 × 675</b><br>
-      Full HD Image: <b>1600 × 900</b><br>
-      Square Image: <b>1200 × 1200</b>
-    </div>
-  </div>
+<div class="tool">
 
-  <!-- File Name Generator -->
-  <div class="tool">
-    <h2>SEO Image File Name Generator</h2>
-    <input id="filenameInput" placeholder="Enter post title or keyword">
-    <button onclick="generateFileName()">Generate</button>
-    <div class="output" id="fileNameOutput"></div>
-  </div>
+<label>1. Post Title</label>
+<input id="title" placeholder="Enter post title">
 
-  <!-- Alt Text Generator -->
-  <div class="tool">
-    <h2>Image Alt Text Generator</h2>
-    <input id="altInput" placeholder="Enter post title or keyword">
-    <button onclick="generateAlt()">Generate</button>
-    <div class="output" id="altOutput"></div>
-  </div>
+<label>2. Upload Background Image</label>
+<input type="file" id="bgImage" accept="image/*">
 
-  <!-- Image Title Text -->
-  <div class="tool">
-    <h2>Image Title Text (Blogger)</h2>
-    <input id="titleInput" placeholder="Enter post title">
-    <button onclick="generateTitle()">Generate</button>
-    <div class="output" id="titleOutput"></div>
-  </div>
+<label>3. Quote (Any Language)</label>
+<textarea id="quote" rows="4" placeholder="Enter quote (English / తెలుగు / हिंदी / தமிழ் / ಕನ್ನಡ)"></textarea>
+
+<label>4. Select Image Size</label>
+<select id="size">
+  <option value="1200x675">1200 × 675 (Featured)</option>
+  <option value="1600x900">1600 × 900 (HD)</option>
+  <option value="1200x1200">1200 × 1200 (Square)</option>
+</select>
+
+<button onclick="generateImage()">Download Image</button>
+
+</div>
+
+<canvas id="canvas"></canvas>
 
 </div>
 
@@ -98,21 +85,70 @@ function slugify(text) {
     .trim();
 }
 
-function generateFileName() {
-  let text = document.getElementById("filenameInput").value;
-  document.getElementById("fileNameOutput").innerText =
-    slugify(text) + ".webp";
+function generateImage() {
+  const title = document.getElementById("title").value;
+  const quote = document.getElementById("quote").value;
+  const size = document.getElementById("size").value;
+  const file = document.getElementById("bgImage").files[0];
+
+  if (!title || !quote || !file) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  const [w, h] = size.split("x");
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = w;
+  canvas.height = h;
+
+  const img = new Image();
+  img.onload = function () {
+    ctx.drawImage(img, 0, 0, w, h);
+
+    // Dark overlay for readability
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.fillRect(0, 0, w, h);
+
+    // Quote text
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.font = "bold 48px Arial";
+
+    wrapText(ctx, quote, w / 2, h / 2, w - 100, 60);
+
+    // Download
+    const link = document.createElement("a");
+    link.download = slugify(title) + ".png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  img.src = URL.createObjectURL(file);
 }
 
-function generateAlt() {
-  let text = document.getElementById("altInput").value;
-  document.getElementById("altOutput").innerText =
-    text + " - complete details and latest update";
-}
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(" ");
+  let line = "";
+  let lines = [];
 
-function generateTitle() {
-  let text = document.getElementById("titleInput").value;
-  document.getElementById("titleOutput").innerText = text;
+  for (let n = 0; n < words.length; n++) {
+    let testLine = line + words[n] + " ";
+    let metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && n > 0) {
+      lines.push(line);
+      line = words[n] + " ";
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+
+  y -= (lines.length - 1) * lineHeight / 2;
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], x, y);
+    y += lineHeight;
+  }
 }
 </script>
 
