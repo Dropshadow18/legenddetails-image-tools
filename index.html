@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LegendDetails Image Tools</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+}
+.tool {
+  background: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+}
+button {
+  margin-top: 10px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+.output {
+  margin-top: 10px;
+  background: #f1f1f1;
+  padding: 10px;
+  border-radius: 4px;
+}
+.copy {
+  background: #007bff;
+  color: #fff;
+  border: none;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>LegendDetails – Image Tools</h1>
+
+  <!-- Image Sizes -->
+  <div class="tool">
+    <h2>Image Size Guide (Blogger)</h2>
+    <div class="output">
+      Featured Image: <b>1200 × 675</b><br>
+      Full HD Image: <b>1600 × 900</b><br>
+      Square Image: <b>1200 × 1200</b>
+    </div>
+  </div>
+
+  <!-- File Name Generator -->
+  <div class="tool">
+    <h2>SEO Image File Name Generator</h2>
+    <input id="filenameInput" placeholder="Enter post title or keyword">
+    <button onclick="generateFileName()">Generate</button>
+    <div class="output" id="fileNameOutput"></div>
+  </div>
+
+  <!-- Alt Text Generator -->
+  <div class="tool">
+    <h2>Image Alt Text Generator</h2>
+    <input id="altInput" placeholder="Enter post title or keyword">
+    <button onclick="generateAlt()">Generate</button>
+    <div class="output" id="altOutput"></div>
+  </div>
+
+  <!-- Image Title Text -->
+  <div class="tool">
+    <h2>Image Title Text (Blogger)</h2>
+    <input id="titleInput" placeholder="Enter post title">
+    <button onclick="generateTitle()">Generate</button>
+    <div class="output" id="titleOutput"></div>
+  </div>
+
+</div>
+
+<script>
+function slugify(text) {
+  return text.toLowerCase()
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\s+/g, '-')
+    .trim();
+}
+
+function generateFileName() {
+  let text = document.getElementById("filenameInput").value;
+  document.getElementById("fileNameOutput").innerText =
+    slugify(text) + ".webp";
+}
+
+function generateAlt() {
+  let text = document.getElementById("altInput").value;
+  document.getElementById("altOutput").innerText =
+    text + " - complete details and latest update";
+}
+
+function generateTitle() {
+  let text = document.getElementById("titleInput").value;
+  document.getElementById("titleOutput").innerText = text;
+}
+</script>
+
+</body>
+</html>
