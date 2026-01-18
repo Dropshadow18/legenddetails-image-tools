@@ -27,6 +27,7 @@ input,textarea,select{width:100%;padding:8px;margin-top:5px}
 .row>div{flex:1}
 #preview{max-width:100%;border:2px solid #ccc;margin-top:15px}
 canvas{display:none}
+#font option{padding:5px;}
 </style>
 </head>
 
@@ -54,7 +55,7 @@ canvas{display:none}
 <label>Quote Text (ENTER = New Line)</label>
 <textarea id="quote" rows="4"></textarea>
 
-<label>Font Style</label>
+<label>Font Style (Preview)</label>
 <select id="font"></select>
 
 <div class="row">
@@ -127,12 +128,14 @@ const fontMap = {
   kn:["Noto Sans Kannada","Noto Serif Kannada"]
 };
 
-// Populate font dropdown per language
+// Populate font dropdown with preview
 function loadFonts(){
   font.innerHTML="";
   fontMap[language.value].forEach(f=>{
     const o=document.createElement("option");
-    o.value=f; o.textContent=f;
+    o.value=f;
+    o.textContent=f;
+    o.style.fontFamily=f; // 🔹 preview inside dropdown
     font.appendChild(o);
   });
 }
@@ -163,8 +166,7 @@ function render(){
     ctx.textAlign=align.value;
 
     // shadow
-    ctx.shadowColor="transparent";
-    ctx.shadowBlur=0;
+    ctx.shadowColor="transparent"; ctx.shadowBlur=0;
     if(shadow.value==="soft"){ ctx.shadowColor="rgba(0,0,0,0.5)"; ctx.shadowBlur=10; }
     if(shadow.value==="strong"){ ctx.shadowColor="rgba(0,0,0,0.8)"; ctx.shadowBlur=16; }
     if(shadow.value==="glow"){ ctx.shadowColor=color.value; ctx.shadowBlur=20; }
