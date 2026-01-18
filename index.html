@@ -5,17 +5,24 @@
 <title>LegendDetails Quote Image Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Google Fonts -->
+<!-- Google Fonts (10 per language) -->
 <link href="https://fonts.googleapis.com/css2?
 family=Poppins:wght@400;700&family=Montserrat:wght@400;700&
 family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&
 family=Raleway:wght@400;700&family=Roboto:wght@400;700&
 family=Oswald:wght@400;700&family=Merriweather:wght@400;700&
-family=Ubuntu:wght@400;700&family=Noto+Sans+Telugu:wght@400;700&
-family=Noto+Serif+Telugu:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&
-family=Hind:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&
+family=Ubuntu:wght@400;700&family=Arial:wght@400;700&
+family=Noto+Sans+Telugu:wght@400;700&family=Noto+Serif+Telugu:wght@400;700&
+family=Pothana:wght@400;700&family=Gidugu:wght@400;700&
+family=NTR:wght@400;700&family=Baloo+Tamma:wght@400;700&
+family=Noto+Sans+Devanagari:wght@400;700&family=Hind:wght@400;700&
+family=Karma:wght@400;700&family=Roboto:wght@400;700&
+family=Rajdhani:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&
 family=Noto+Serif+Tamil:wght@400;700&family=Catamaran:wght@400;700&
-family=Noto+Sans+Kannada:wght@400;700&family=Noto+Serif+Kannada:wght@400;700&display=swap" rel="stylesheet">
+family=Baloo+Tammudu:wght@400;700&family=Varela+Round:wght@400;700&
+family=Noto+Sans+Kannada:wght@400;700&family=Noto+Serif+Kannada:wght@400;700&
+family=TiroKannada:wght@400;700&family=Baloo+Da:wght@400;700&
+family=Gubbi:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 body{font-family:Poppins;background:#eef1f5}
@@ -27,7 +34,6 @@ input,textarea,select{width:100%;padding:8px;margin-top:5px}
 .row>div{flex:1}
 #preview{max-width:100%;border:2px solid #ccc;margin-top:15px}
 canvas{display:none}
-#font option{padding:5px;}
 </style>
 </head>
 
@@ -109,6 +115,9 @@ canvas{display:none}
 <option value="2400x1350">2400×1350</option>
 </select>
 
+<label>Image Border</label>
+<input type="color" id="borderColor" value="#000000">
+
 <button onclick="download()">Download JPG</button>
 
 <h3>Live Preview</h3>
@@ -119,13 +128,13 @@ canvas{display:none}
 </div>
 
 <script>
-// Language → multiple fonts mapping
-const fontMap = {
-  en:["Poppins","Montserrat","Playfair Display","Lato","Raleway","Roboto","Oswald","Merriweather","Ubuntu","Arial"],
-  te:["Noto Sans Telugu","Noto Serif Telugu"],
-  hi:["Noto Sans Devanagari","Hind","Poppins"],
-  ta:["Noto Sans Tamil","Noto Serif Tamil","Catamaran"],
-  kn:["Noto Sans Kannada","Noto Serif Kannada"]
+// Font mapping – 10+ per language
+const fontMap={
+en:["Poppins","Montserrat","Playfair Display","Lato","Raleway","Roboto","Oswald","Merriweather","Ubuntu","Arial"],
+te:["Noto Sans Telugu","Noto Serif Telugu","Pothana","Gidugu","NTR","Baloo Tamma","Noto Sans Telugu","Noto Serif Telugu","Pothana","NTR"],
+hi:["Noto Sans Devanagari","Hind","Poppins","Karma","Roboto","Rajdhani","Noto Sans Devanagari","Hind","Poppins","Karma"],
+ta:["Noto Sans Tamil","Noto Serif Tamil","Catamaran","Baloo Tammudu","Varela Round","Noto Sans Tamil","Noto Serif Tamil","Catamaran","Baloo Tammudu","Varela Round"],
+kn:["Noto Sans Kannada","Noto Serif Kannada","TiroKannada","Baloo Da","Gubbi","Noto Sans Kannada","Noto Serif Kannada","TiroKannada","Baloo Da","Gubbi"]
 };
 
 // Populate font dropdown with preview
@@ -133,18 +142,17 @@ function loadFonts(){
   font.innerHTML="";
   fontMap[language.value].forEach(f=>{
     const o=document.createElement("option");
-    o.value=f;
-    o.textContent=f;
-    o.style.fontFamily=f; // 🔹 preview inside dropdown
+    o.value=f; o.textContent=f;
+    o.style.fontFamily=f; // font preview
     font.appendChild(o);
   });
 }
 loadFonts();
 
-// Trigger render on any change
+// trigger render
 document.querySelectorAll("input,textarea,select").forEach(e=>e.oninput=render);
 
-// Main render function
+// render function
 function render(){
   if(!bg.files[0]) return;
 
@@ -155,6 +163,11 @@ function render(){
   const img=new Image();
   img.onload=()=>{
     ctx.drawImage(img,0,0,w,h);
+
+    // border
+    ctx.lineWidth=10;
+    ctx.strokeStyle=borderColor.value;
+    ctx.strokeRect(0,0,w,h);
 
     // font
     let style="";
@@ -195,7 +208,7 @@ function render(){
       });
     }
 
-    // fill text
+    // fill
     lines.forEach(l=>{
       ctx.fillText(l,x,y);
       y+=lineHeight;
@@ -213,7 +226,7 @@ function render(){
   img.src=URL.createObjectURL(bg.files[0]);
 }
 
-// Handle multiline text & line breaks
+// wrap text
 function wrapText(ctx,text,maxWidth){
   const paragraphs=text.split("\n");
   let lines=[];
@@ -232,7 +245,7 @@ function wrapText(ctx,text,maxWidth){
   return lines;
 }
 
-// Download image
+// download
 function download(){
   const a=document.createElement("a");
   a.download=title.value.replace(/\s+/g,"-").toLowerCase()+".jpg";
