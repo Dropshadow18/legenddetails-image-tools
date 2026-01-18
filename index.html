@@ -39,7 +39,7 @@ canvas{display:none}
   <option value="kn">Kannada</option>
 </select>
 
-<label>4. Quote Text</label>
+<label>4. Quote Text (Enter = New Line)</label>
 <textarea id="quote" rows="4"></textarea>
 
 <label>5. Font Style</label>
@@ -190,13 +190,14 @@ function render(){
     ctx.font=style;
     ctx.fillStyle=color.value;
     ctx.textAlign=align.value;
-    ctx.letterSpacing=spacing.value+"px";
 
     let y=h/2;
     if(vertical.value==="top") y=120;
     if(vertical.value==="bottom") y=h-120;
 
-    wrap(ctx,quote.value,align.value==="left"?100:align.value==="right"?w-100:w/2,y,w-200,lineGap.value);
+    drawMultiline(ctx,quote.value,
+      align.value==="left"?100:align.value==="right"?w-100:w/2,
+      y,w-200,lineGap.value);
 
     ctx.font=`${wmSize.value}px Arial`;
     ctx.fillStyle="rgba(255,255,255,0.7)";
@@ -208,17 +209,31 @@ function render(){
   img.src=URL.createObjectURL(bg.files[0]);
 }
 
-function wrap(ctx,text,x,y,maxW,lh){
-  const words=text.split(" ");
-  let line="",lines=[];
-  words.forEach(w=>{
-    let t=line+w+" ";
-    if(ctx.measureText(t).width>maxW){lines.push(line);line=w+" "}
-    else line=t;
+/* ✅ FIXED MULTI-LINE FUNCTION */
+function drawMultiline(ctx,text,x,y,maxW,lh){
+  const paragraphs=text.split("\n"); // respect Enter
+  let lines=[];
+
+  paragraphs.forEach(p=>{
+    const words=p.split(" ");
+    let line="";
+    words.forEach(w=>{
+      let test=line+w+" ";
+      if(ctx.measureText(test).width>maxW && line!==""){
+        lines.push(line);
+        line=w+" ";
+      }else{
+        line=test;
+      }
+    });
+    lines.push(line);
   });
-  lines.push(line);
+
   y-=(lines.length-1)*lh/2;
-  lines.forEach(l=>{ctx.fillText(l,x,y);y+=lh});
+  lines.forEach(l=>{
+    ctx.fillText(l,x,y);
+    y+=lh;
+  });
 }
 
 function download(){
