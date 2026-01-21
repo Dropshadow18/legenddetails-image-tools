@@ -5,7 +5,7 @@
 <title>LegendDetails Quote Image Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Google Fonts (10 per language) -->
+<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?
 family=Poppins:wght@400;700&family=Montserrat:wght@400;700&
 family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&
@@ -16,16 +16,15 @@ family=Noto+Sans+Telugu:wght@400;700&family=Noto+Serif+Telugu:wght@400;700&
 family=Pothana:wght@400;700&family=Gidugu:wght@400;700&
 family=NTR:wght@400;700&family=Baloo+Tamma:wght@400;700&
 family=Noto+Sans+Devanagari:wght@400;700&family=Hind:wght@400;700&
-family=Karma:wght@400;700&family=Roboto:wght@400;700&
-family=Rajdhani:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&
-family=Noto+Serif+Tamil:wght@400;700&family=Catamaran:wght@400;700&
-family=Baloo+Tammudu:wght@400;700&family=Varela+Round:wght@400;700&
-family=Noto+Sans+Kannada:wght@400;700&family=Noto+Serif+Kannada:wght@400;700&
-family=TiroKannada:wght@400;700&family=Baloo+Da:wght@400;700&
-family=Gubbi:wght@400;700&display=swap" rel="stylesheet">
+family=Karma:wght@400;700&family=Rajdhani:wght@400;700&
+family=Noto+Sans+Tamil:wght@400;700&family=Noto+Serif+Tamil:wght@400;700&
+family=Catamaran:wght@400;700&family=Baloo+Tammudu:wght@400;700&
+family=Varela+Round:wght@400;700&family=Noto+Sans+Kannada:wght@400;700&
+family=Noto+Serif+Kannada:wght@400;700&family=TiroKannada:wght@400;700&
+family=Baloo+Da:wght@400;700&family=Gubbi:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-body{font-family:Poppins;background:#eef1f5}
+body{font-family:Poppins;background:#eef1f5;margin:0;padding:0}
 .container{max-width:1200px;margin:auto;padding:20px}
 .tool{background:#fff;padding:20px;border-radius:10px}
 label{font-weight:bold;margin-top:10px;display:block}
@@ -67,11 +66,11 @@ canvas{display:none}
 <div class="row">
 <div>
 <label>Text Size</label>
-<input type="range" id="textSize" min="16" max="72" value="42">
+<input type="range" id="textSize" min="16" max="300" value="42">
 </div>
 <div>
 <label>Line Gap</label>
-<input type="range" id="lineGap" min="20" max="120" value="60">
+<input type="range" id="lineGap" min="20" max="150" value="60">
 </div>
 </div>
 
@@ -108,15 +107,25 @@ canvas{display:none}
 <option value="bottom">Bottom</option>
 </select>
 
-<label>Image Size</label>
+<label>Image Size (SEO Optimized)</label>
 <select id="size">
-<option value="1200x675">1200×675</option>
-<option value="1600x900">1600×900</option>
-<option value="2400x1350">2400×1350</option>
+  <option value="1200x675">Standard Blog Post - 1200×675</option>
+  <option value="1600x900">Large Header - 1600×900</option>
+  <option value="2400x1350">High Quality - 2400×1350</option>
+  <option value="800x450">Thumbnail - 800×450</option>
+  <option value="1080x1920">Pinterest Vertical - 1080×1920</option>
 </select>
 
-<label>Image Border</label>
+<label>Image Border Color</label>
 <input type="color" id="borderColor" value="#000000">
+
+<label>Border Style</label>
+<select id="borderStyle">
+<option value="solid">Solid</option>
+<option value="dashed">Dashed</option>
+<option value="dotted">Dotted</option>
+<option value="double">Double</option>
+</select>
 
 <button onclick="download()">Download JPG</button>
 
@@ -131,10 +140,10 @@ canvas{display:none}
 // Font mapping – 10+ per language
 const fontMap={
 en:["Poppins","Montserrat","Playfair Display","Lato","Raleway","Roboto","Oswald","Merriweather","Ubuntu","Arial"],
-te:["Noto Sans Telugu","Noto Serif Telugu","Pothana","Gidugu","NTR","Baloo Tamma","Noto Sans Telugu","Noto Serif Telugu","Pothana","NTR"],
-hi:["Noto Sans Devanagari","Hind","Poppins","Karma","Roboto","Rajdhani","Noto Sans Devanagari","Hind","Poppins","Karma"],
-ta:["Noto Sans Tamil","Noto Serif Tamil","Catamaran","Baloo Tammudu","Varela Round","Noto Sans Tamil","Noto Serif Tamil","Catamaran","Baloo Tammudu","Varela Round"],
-kn:["Noto Sans Kannada","Noto Serif Kannada","TiroKannada","Baloo Da","Gubbi","Noto Sans Kannada","Noto Serif Kannada","TiroKannada","Baloo Da","Gubbi"]
+te:["Noto Sans Telugu","Noto Serif Telugu","Pothana","Gidugu","NTR","Baloo Tamma","NTR","Gidugu","Pothana","Noto Sans Telugu"],
+hi:["Noto Sans Devanagari","Hind","Poppins","Karma","Roboto","Rajdhani","Hind","Karma","Rajdhani","Noto Sans Devanagari"],
+ta:["Noto Sans Tamil","Noto Serif Tamil","Catamaran","Baloo Tammudu","Varela Round","Catamaran","Baloo Tammudu","Varela Round","Noto Sans Tamil","Noto Serif Tamil"],
+kn:["Noto Sans Kannada","Noto Serif Kannada","TiroKannada","Baloo Da","Gubbi","Baloo Da","Gubbi","Noto Sans Kannada","Noto Serif Kannada","TiroKannada"]
 };
 
 // Populate font dropdown with preview
@@ -149,10 +158,10 @@ function loadFonts(){
 }
 loadFonts();
 
-// trigger render
+// Trigger render on any input
 document.querySelectorAll("input,textarea,select").forEach(e=>e.oninput=render);
 
-// render function
+// Main render function
 function render(){
   if(!bg.files[0]) return;
 
@@ -164,32 +173,34 @@ function render(){
   img.onload=()=>{
     ctx.drawImage(img,0,0,w,h);
 
-    // border
+    // Border
     ctx.lineWidth=10;
     ctx.strokeStyle=borderColor.value;
+    const style=borderStyle.value;
+    ctx.setLineDash(style==="dashed"?[20,10]:style==="dotted"?[5,5]:style==="double"?[10,0]:[]);
     ctx.strokeRect(0,0,w,h);
 
-    // font
-    let style="";
-    if(bold.checked) style+="bold ";
-    if(italic.checked) style+="italic ";
-    style+=`${textSize.value}px ${font.value}`;
-    ctx.font=style;
+    // Font style
+    let fs="";
+    if(bold.checked) fs+="bold ";
+    if(italic.checked) fs+="italic ";
+    fs+=`${textSize.value}px ${font.value}`;
+    ctx.font=fs;
     ctx.fillStyle=color.value;
     ctx.textAlign=align.value;
 
-    // shadow
+    // Shadow
     ctx.shadowColor="transparent"; ctx.shadowBlur=0;
     if(shadow.value==="soft"){ ctx.shadowColor="rgba(0,0,0,0.5)"; ctx.shadowBlur=10; }
     if(shadow.value==="strong"){ ctx.shadowColor="rgba(0,0,0,0.8)"; ctx.shadowBlur=16; }
     if(shadow.value==="glow"){ ctx.shadowColor=color.value; ctx.shadowBlur=20; }
 
-    // line height
+    // Line height
     const lineHeight=Math.max(lineGap.value, textSize.value*1.3);
     const lines=wrapText(ctx,quote.value,w-200);
     const blockHeight=lines.length*lineHeight;
 
-    // vertical position
+    // Vertical position
     let y;
     if(vertical.value==="top") y=120;
     else if(vertical.value==="bottom") y=h-blockHeight-120;
@@ -197,7 +208,7 @@ function render(){
 
     const x=align.value==="left"?100:align.value==="right"?w-100:w/2;
 
-    // outline
+    // Outline
     if(outline.checked){
       ctx.lineWidth=Math.max(2,textSize.value/10);
       ctx.strokeStyle=outlineColor.value;
@@ -208,13 +219,13 @@ function render(){
       });
     }
 
-    // fill
+    // Fill text
     lines.forEach(l=>{
       ctx.fillText(l,x,y);
       y+=lineHeight;
     });
 
-    // watermark
+    // Watermark
     ctx.shadowBlur=0;
     ctx.font="20px Poppins";
     ctx.fillStyle="rgba(255,255,255,0.7)";
@@ -226,7 +237,7 @@ function render(){
   img.src=URL.createObjectURL(bg.files[0]);
 }
 
-// wrap text
+// Wrap text & preserve line breaks
 function wrapText(ctx,text,maxWidth){
   const paragraphs=text.split("\n");
   let lines=[];
@@ -245,7 +256,7 @@ function wrapText(ctx,text,maxWidth){
   return lines;
 }
 
-// download
+// Download JPG
 function download(){
   const a=document.createElement("a");
   a.download=title.value.replace(/\s+/g,"-").toLowerCase()+".jpg";
