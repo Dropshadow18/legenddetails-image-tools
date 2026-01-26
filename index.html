@@ -14,47 +14,33 @@ body {
   color: #fff;
   font-family: 'Playfair Display', serif;
 }
-
 .container {
   max-width: 1200px;
   margin: auto;
   padding: 20px;
 }
-
-h1 {
-  text-align: center;
-  font-weight: 600;
-}
-
+h1 { text-align: center; }
 .controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
   gap: 10px;
 }
-
 textarea, select, button {
   padding: 10px;
   border-radius: 6px;
   border: none;
-  font-size: 14px;
 }
-
-textarea {
-  min-height: 130px;
-}
-
+textarea { min-height: 130px; }
 button {
   background: #facc15;
   font-weight: 600;
   cursor: pointer;
 }
-
 .preview {
   display: flex;
   justify-content: center;
   margin-top: 20px;
 }
-
 canvas {
   width: 100%;
   max-width: 900px;
@@ -65,14 +51,10 @@ canvas {
 
 <body>
 <div class="container">
-
 <h1>Premium Quote Image Studio</h1>
 
 <div class="controls">
-<textarea id="quoteText" placeholder="Paste quote here (English / Telugu)
-Example:
-Life does not get easier
-You get stronger with courage"></textarea>
+<textarea id="quoteText" placeholder="Paste quote here"></textarea>
 
 <select id="language">
   <option value="en">English</option>
@@ -93,7 +75,6 @@ You get stronger with courage"></textarea>
 <div class="preview">
 <canvas id="canvas" width="2400" height="2400"></canvas>
 </div>
-
 </div>
 
 <script>
@@ -106,8 +87,6 @@ function renderQuote() {
   const preset = document.getElementById("preset").value;
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // Background
   ctx.fillStyle = "#020617";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
@@ -115,8 +94,6 @@ function renderQuote() {
     ? "'Noto Serif Telugu'"
     : "'Playfair Display'";
 
-  let startY = 700;
-  let lineGap = 170;
   let baseSize = 96;
   let highlightSize = 140;
   let highlightColor = "#d4af37";
@@ -126,44 +103,49 @@ function renderQuote() {
     highlightSize = 150;
   }
   if(preset === "hero") {
-    highlightColor = "#facc15";
     highlightSize = 170;
-    lineGap = 190;
   }
   if(preset === "spiritual") {
     highlightColor = "#a5f3fc";
-    highlightSize = 140;
   }
 
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  const maxWidth = canvas.width * 0.75;
+  let y = 700;
+  const lineHeight = 160;
 
-  let lines = text.split("\n");
-  let y = startY;
+  const lines = text.split("\n");
 
   lines.forEach(line => {
-    let words = line.split(" ");
-    let highlightIndex = Math.floor(words.length / 2);
+    const words = line.split(" ");
+    const highlightIndex = Math.floor(words.length / 2);
 
-    let x = canvas.width / 2;
+    let x = canvas.width / 2 - maxWidth / 2;
 
     words.forEach((word, i) => {
-      let isHighlight = i === highlightIndex;
+      const isHighlight = i === highlightIndex;
+      const size = isHighlight ? highlightSize : baseSize;
 
-      ctx.font = `${isHighlight ? highlightSize : baseSize}px ${fontFamily}`;
+      ctx.font = `${size}px ${fontFamily}`;
       ctx.fillStyle = isHighlight ? highlightColor : "#f8fafc";
 
+      const wordWidth = ctx.measureText(word + " ").width;
+
+      if (x + wordWidth > canvas.width / 2 + maxWidth / 2) {
+        x = canvas.width / 2 - maxWidth / 2;
+        y += lineHeight;
+      }
+
       ctx.fillText(word + " ", x, y);
-      x += ctx.measureText(word + " ").width;
+      x += wordWidth;
     });
 
-    y += lineGap;
+    y += lineHeight;
   });
 
-  // Footer
   ctx.globalAlpha = 0.35;
   ctx.font = "36px Arial";
   ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
   ctx.fillText("LegendDetails", canvas.width / 2, canvas.height - 120);
   ctx.globalAlpha = 1;
 }
