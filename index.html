@@ -20,6 +20,7 @@ body {
   padding: 20px;
 }
 h1 { text-align: center; }
+
 .controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
@@ -36,16 +37,15 @@ button {
   font-weight: 600;
   cursor: pointer;
 }
-.preview { display: flex; justify-content: center; margin-top: 20px; }
+.preview {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
 canvas {
   width: 100%;
   max-width: 900px;
   border-radius: 14px;
-}
-.tip {
-  opacity: 0.6;
-  font-size: 13px;
-  margin-top: 5px;
 }
 </style>
 </head>
@@ -56,23 +56,28 @@ canvas {
 <h1>Premium Quote Image Studio</h1>
 
 <div class="controls">
-<textarea id="quoteText" placeholder="Use format:
+<textarea id="quoteText" placeholder="Use:
 [word|color|size]
 
 Example:
 Success is not [final|gold|120]
-It is the [courage|white|140] to continue"></textarea>
+It is the [courage|white|150] to continue"></textarea>
 
 <select id="language">
   <option value="en">English</option>
   <option value="te">Telugu</option>
 </select>
 
-<button onclick="renderQuote()">Preview</button>
-<button onclick="downloadImage()">Download Image</button>
-</div>
+<select id="template">
+  <option value="center">Minimal Center</option>
+  <option value="left">Editorial Left</option>
+  <option value="focus">Highlight Focus</option>
+  <option value="box">Boxed Quote</option>
+</select>
 
-<div class="tip">Tip: Colors can be gold, red, white or hex (#d4af37)</div>
+<button onclick="renderQuote()">Preview</button>
+<button onclick="downloadImage()">Download</button>
+</div>
 
 <div class="preview">
 <canvas id="canvas" width="2400" height="2400"></canvas>
@@ -87,37 +92,53 @@ const ctx = canvas.getContext("2d");
 function renderQuote() {
   const text = document.getElementById("quoteText").value;
   const lang = document.getElementById("language").value;
+  const template = document.getElementById("template").value;
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // Background
   ctx.fillStyle = "#020617";
   ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
 
   let baseFont = lang === "te"
     ? "'Noto Serif Telugu'"
     : "'Playfair Display'";
 
-  let y = canvas.height / 2 - 200;
+  let align = "center";
+  let startX = canvas.width / 2;
+  let startY = canvas.height / 2 - 300;
+  let lineGap = 160;
+
+  if(template === "left") {
+    align = "left";
+    startX = 300;
+  }
+  if(template === "focus") {
+    lineGap = 190;
+  }
+  if(template === "box") {
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    ctx.fillRect(350,700,1700,900);
+    ctx.fillStyle = "#fff";
+  }
+
+  ctx.textAlign = align;
+  ctx.textBaseline = "middle";
+
+  let y = startY;
 
   text.split("\n").forEach(line => {
-    let x = canvas.width / 2;
-    let parts = parseLine(line);
-
-    parts.forEach(p => {
-      ctx.font = `${p.size || 96}px ${baseFont}`;
-      ctx.fillStyle = p.color || "#f8fafc";
-      ctx.fillText(p.text, x, y);
-      x += ctx.measureText(p.text).width;
+    let x = startX;
+    parseLine(line).forEach(part => {
+      let size = part.size || (template === "focus" ? 120 : 96);
+      ctx.font = `${size}px ${baseFont}`;
+      ctx.fillStyle = part.color || "#f8fafc";
+      ctx.fillText(part.text, x, y);
+      x += ctx.measureText(part.text).width;
     });
-
-    y += 150;
+    y += lineGap;
   });
 
-  ctx.globalAlpha = 0.4;
+  ctx.globalAlpha = 0.35;
   ctx.font = "36px Arial";
   ctx.fillStyle = "#fff";
   ctx.fillText("LegendDetails", canvas.width / 2, canvas.height - 120);
@@ -126,27 +147,21 @@ function renderQuote() {
 
 function parseLine(line) {
   let regex = /\[(.*?)\|(.*?)\|(.*?)\]/g;
-  let result = [];
-  let lastIndex = 0;
-  let match;
+  let out = [];
+  let last = 0;
+  let m;
 
-  while ((match = regex.exec(line)) !== null) {
-    if (match.index > lastIndex) {
-      result.push({ text: line.substring(lastIndex, match.index) });
-    }
-    result.push({
-      text: match[1],
-      color: match[2] === "gold" ? "#d4af37" : match[2],
-      size: parseInt(match[3])
+  while((m = regex.exec(line)) !== null) {
+    if(m.index > last) out.push({ text: line.substring(last,m.index) });
+    out.push({
+      text: m[1],
+      color: m[2] === "gold" ? "#d4af37" : m[2],
+      size: parseInt(m[3])
     });
-    lastIndex = regex.lastIndex;
+    last = regex.lastIndex;
   }
-
-  if (lastIndex < line.length) {
-    result.push({ text: line.substring(lastIndex) });
-  }
-
-  return result;
+  if(last < line.length) out.push({ text: line.substring(last) });
+  return out;
 }
 
 function downloadImage() {
