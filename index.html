@@ -2,282 +2,169 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LegendDetails Quote Image Studio</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LegendDetails – Premium Quote Image Tool</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?
-family=Poppins:wght@400;700&
-family=Montserrat:wght@400;700&
-family=Playfair+Display:wght@400;700&
-family=Raleway:wght@400;700&
-family=Roboto:wght@400;700&
-family=Oswald:wght@400;700&
-family=Merriweather:wght@400;700&
-family=Ubuntu:wght@400;700&
-family=Noto+Sans+Telugu:wght@400;700&
-family=Noto+Serif+Telugu:wght@400;700&
-family=Pothana&
-family=Gidugu&
-family=NTR&
-family=Noto+Sans+Devanagari:wght@400;700&
-family=Hind:wght@400;700&
-family=Karma&
-family=Noto+Sans+Tamil:wght@400;700&
-family=Noto+Serif+Tamil:wght@400;700&
-family=Catamaran:wght@400;700&
-family=Noto+Sans+Kannada:wght@400;700&
-family=Noto+Serif+Kannada:wght@400;700&
-family=Tiro+Kannada&
-display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-body{font-family:Poppins;background:#eef1f5;margin:0}
-.container{max-width:1200px;margin:auto;padding:20px}
-.tool{background:#fff;padding:20px;border-radius:10px}
-label{font-weight:bold;margin-top:10px;display:block}
-input,textarea,select{width:100%;padding:8px;margin-top:5px}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.row>div{flex:1}
-#preview{max-width:100%;border:2px solid #ccc;margin-top:15px}
-canvas{display:none}
+body {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  background: #0f172a;
+  color: #fff;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  font-weight: 600;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+textarea, input, select, button {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+}
+
+textarea {
+  min-height: 120px;
+}
+
+button {
+  background: #facc15;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.preview-box {
+  background: #000;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+canvas {
+  width: 100%;
+  max-width: 800px;
+  border-radius: 12px;
+}
 </style>
 </head>
 
 <body>
 <div class="container">
-<h1>LegendDetails – Quote Image Studio</h1>
 
-<div class="tool">
+<h1>Premium Quote Image Studio</h1>
 
-<label>Post Title</label>
-<input id="title">
+<div class="controls">
+  <textarea id="quoteText" placeholder="Enter quote (English / Telugu)"></textarea>
 
-<label>Upload Background Image</label>
-<input type="file" id="bg" accept="image/*">
+  <input id="highlightWord" placeholder="Highlight word (optional)">
 
-<label>Quote Language</label>
-<select id="language" onchange="loadFonts()">
-<option value="en">English</option>
-<option value="te">Telugu</option>
-<option value="hi">Hindi</option>
-<option value="ta">Tamil</option>
-<option value="kn">Kannada</option>
-</select>
+  <select id="language">
+    <option value="en">English</option>
+    <option value="te">Telugu</option>
+  </select>
 
-<label>Quote Text (ENTER = New Line)</label>
-<textarea id="quote" rows="4"></textarea>
+  <select id="highlightColor">
+    <option value="#d4af37">Gold</option>
+    <option value="#ffffff">White</option>
+    <option value="#ef4444">Soft Red</option>
+  </select>
 
-<label>Font Style (Preview)</label>
-<select id="font"></select>
-
-<div class="row">
-<div>
-<label>Font Size (up to 300)</label>
-<input type="range" id="textSize" min="16" max="300" value="48">
-</div>
-<div>
-<label>Line Gap</label>
-<input type="range" id="lineGap" min="20" max="200" value="70">
-</div>
+  <button onclick="renderQuote()">Preview</button>
+  <button onclick="downloadImage()">Download Image</button>
 </div>
 
-<label>Text Style</label>
-<input type="checkbox" id="bold"> Bold
-<input type="checkbox" id="italic"> Italic
-
-<label>Text Gradient</label>
-<input type="color" id="grad1" value="#ff9800">
-<input type="color" id="grad2" value="#ff0055">
-
-<label>Gradient Direction</label>
-<select id="gradDir">
-<option value="horizontal">Horizontal</option>
-<option value="vertical">Vertical</option>
-<option value="diagonal">Diagonal</option>
-</select>
-
-<label>Text Effects</label>
-<select id="effect">
-<option value="none">None</option>
-<option value="neon">Neon Glow</option>
-<option value="emboss">Emboss</option>
-<option value="engrave">Engrave</option>
-<option value="box">Background Box</option>
-</select>
-
-<label>Text Alignment</label>
-<select id="align">
-<option value="center">Center</option>
-<option value="left">Left</option>
-<option value="right">Right</option>
-</select>
-
-<label>Vertical Position</label>
-<select id="vertical">
-<option value="middle">Middle</option>
-<option value="top">Top</option>
-<option value="bottom">Bottom</option>
-</select>
-
-<label>Image Size (SEO Optimized)</label>
-<select id="size">
-<option value="1200x675">1200×675 (Blog)</option>
-<option value="1600x900">1600×900</option>
-<option value="2400x1350">2400×1350</option>
-<option value="800x450">800×450</option>
-<option value="1080x1920">1080×1920 (Vertical)</option>
-</select>
-
-<label>Gradient Border</label>
-<input type="color" id="bgrad1" value="#00c6ff">
-<input type="color" id="bgrad2" value="#0072ff">
-
-<label>Border Style</label>
-<select id="borderStyle">
-<option value="solid">Solid</option>
-<option value="dashed">Dashed</option>
-<option value="dotted">Dotted</option>
-<option value="double">Double</option>
-</select>
-
-<label>Border Thickness</label>
-<input type="range" id="borderWidth" min="2" max="40" value="10">
-
-<button onclick="download()">Download JPG</button>
-
-<h3>Live Preview</h3>
-<img id="preview">
-
+<div class="preview-box">
+  <canvas id="quoteCanvas" width="1200" height="1200"></canvas>
 </div>
-<canvas id="canvas"></canvas>
+
 </div>
 
 <script>
-const fontMap={
-en:["Poppins","Montserrat","Playfair Display","Raleway","Roboto","Oswald","Merriweather","Ubuntu"],
-te:["Noto Sans Telugu","Noto Serif Telugu","Pothana","Gidugu","NTR"],
-hi:["Noto Sans Devanagari","Hind","Karma"],
-ta:["Noto Sans Tamil","Noto Serif Tamil","Catamaran"],
-kn:["Noto Sans Kannada","Noto Serif Kannada","Tiro Kannada"]
-};
+const canvas = document.getElementById("quoteCanvas");
+const ctx = canvas.getContext("2d");
 
-function loadFonts(){
-  font.innerHTML="";
-  fontMap[language.value].forEach(f=>{
-    let o=document.createElement("option");
-    o.value=f; o.textContent=f;
-    o.style.fontFamily=f;
-    font.appendChild(o);
+function renderQuote() {
+  const text = document.getElementById("quoteText").value;
+  const highlight = document.getElementById("highlightWord").value.trim();
+  const lang = document.getElementById("language").value;
+  const highlightColor = document.getElementById("highlightColor").value;
+
+  // Background
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, "#020617");
+  gradient.addColorStop(1, "#020617dd");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Font
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#f8fafc";
+  ctx.font = lang === "te"
+    ? "48px 'Noto Serif Telugu'"
+    : "48px 'Playfair Display'";
+
+  const lines = text.split("\n");
+  let y = 380;
+
+  lines.forEach(line => {
+    if (highlight && line.includes(highlight)) {
+      const parts = line.split(highlight);
+
+      ctx.fillText(parts[0], canvas.width / 2, y);
+
+      ctx.fillStyle = highlightColor;
+      ctx.font = lang === "te"
+        ? "64px 'Noto Serif Telugu'"
+        : "64px 'Playfair Display'";
+      ctx.fillText(highlight, canvas.width / 2, y + 65);
+
+      ctx.fillStyle = "#f8fafc";
+      ctx.font = lang === "te"
+        ? "48px 'Noto Serif Telugu'"
+        : "48px 'Playfair Display'";
+      ctx.fillText(parts[1] || "", canvas.width / 2, y + 120);
+
+      y += 180;
+    } else {
+      ctx.fillText(line, canvas.width / 2, y);
+      y += 70;
+    }
   });
-}
-loadFonts();
 
-document.querySelectorAll("input,textarea,select").forEach(e=>e.oninput=render);
-
-function render(){
-  if(!bg.files[0]) return;
-
-  const [w,h]=size.value.split("x");
-  canvas.width=w; canvas.height=h;
-  const ctx=canvas.getContext("2d");
-
-  const img=new Image();
-  img.onload=()=>{
-    ctx.drawImage(img,0,0,w,h);
-
-    // Gradient border
-    const bw=borderWidth.value;
-    const gb=ctx.createLinearGradient(0,0,w,h);
-    gb.addColorStop(0,bgrad1.value);
-    gb.addColorStop(1,bgrad2.value);
-    ctx.lineWidth=bw;
-    ctx.strokeStyle=gb;
-    ctx.setLineDash(
-      borderStyle.value==="dashed"?[30,15]:
-      borderStyle.value==="dotted"?[8,8]:
-      borderStyle.value==="double"?[bw*2,0]:[]
-    );
-    ctx.strokeRect(bw/2,bw/2,w-bw,h-bw);
-    ctx.setLineDash([]);
-
-    let fs="";
-    if(bold.checked) fs+="bold ";
-    if(italic.checked) fs+="italic ";
-    fs+=`${textSize.value}px ${font.value}`;
-    ctx.font=fs;
-    ctx.textAlign=align.value;
-
-    const lines=wrapText(ctx,quote.value,w-200);
-    const lh=Math.max(lineGap.value,textSize.value*1.3);
-    const bh=lines.length*lh;
-
-    let y=vertical.value==="top"?120:
-          vertical.value==="bottom"?h-bh-120:(h-bh)/2;
-
-    const x=align.value==="left"?100:align.value==="right"?w-100:w/2;
-
-    let tg;
-    if(gradDir.value==="horizontal") tg=ctx.createLinearGradient(x-300,0,x+300,0);
-    else if(gradDir.value==="vertical") tg=ctx.createLinearGradient(0,y-300,0,y+300);
-    else tg=ctx.createLinearGradient(x-300,y-300,x+300,y+300);
-    tg.addColorStop(0,grad1.value);
-    tg.addColorStop(1,grad2.value);
-
-    ctx.fillStyle=tg;
-    ctx.shadowBlur=effect.value==="neon"?30:0;
-    ctx.shadowColor=effect.value==="neon"?grad1.value:"transparent";
-
-    lines.forEach(l=>{
-      if(effect.value==="box"){
-        ctx.fillStyle="rgba(0,0,0,0.45)";
-        ctx.fillRect(x-ctx.measureText(l).width/2-20,y-textSize.value,ctx.measureText(l).width+40,lh);
-        ctx.fillStyle=tg;
-      }
-      if(effect.value==="emboss"){
-        ctx.strokeStyle="rgba(255,255,255,0.6)";
-        ctx.strokeText(l,x-2,y-2);
-      }
-      if(effect.value==="engrave"){
-        ctx.strokeStyle="rgba(0,0,0,0.6)";
-        ctx.strokeText(l,x+2,y+2);
-      }
-      ctx.fillText(l,x,y);
-      y+=lh;
-    });
-
-    ctx.shadowBlur=0;
-    ctx.font="20px Poppins";
-    ctx.fillStyle="rgba(255,255,255,0.7)";
-    ctx.textAlign="right";
-    ctx.fillText("LegendDetails.BlogSpot.Com",w-20,40);
-
-    preview.src=canvas.toDataURL("image/jpeg",0.95);
-  };
-  img.src=URL.createObjectURL(bg.files[0]);
+  // Footer
+  ctx.font = "20px Arial";
+  ctx.globalAlpha = 0.4;
+  ctx.fillText("LegendDetails", canvas.width / 2, canvas.height - 60);
+  ctx.globalAlpha = 1;
 }
 
-function wrapText(ctx,text,maxWidth){
-  let lines=[];
-  text.split("\n").forEach(p=>{
-    let line="";
-    p.split(" ").forEach(w=>{
-      let t=line+w+" ";
-      if(ctx.measureText(t).width>maxWidth && line){
-        lines.push(line); line=w+" ";
-      }else line=t;
-    });
-    lines.push(line);
-  });
-  return lines;
+function downloadImage() {
+  const link = document.createElement("a");
+  link.download = "premium-quote.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
 }
 
-function download(){
-  let a=document.createElement("a");
-  a.download=(title.value||"quote").replace(/\s+/g,"-").toLowerCase()+".jpg";
-  a.href=canvas.toDataURL("image/jpeg",0.95);
-  a.click();
-}
+renderQuote();
 </script>
+
 </body>
 </html>
