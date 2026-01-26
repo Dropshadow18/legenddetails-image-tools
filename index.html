@@ -36,7 +36,7 @@ h1 {
   grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
 }
 
-textarea, select, button {
+textarea, select, button, input[type="file"] {
   padding: 10px;
   border-radius: 6px;
   border: none;
@@ -69,6 +69,25 @@ button {
   justify-content: center;
   text-align: center;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background image overlay */
+.preview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.45;
+  z-index: 0;
+}
+
+.preview > * {
+  position: relative;
+  z-index: 1;
 }
 
 .quote-line {
@@ -101,19 +120,11 @@ button {
 }
 
 /* ===== PRESETS ===== */
-
-.calm {
-  background: #020617;
-}
+.calm { background: #020617; }
 .calm .highlight { color: #d4af37; }
 
-.bold {
-  background: #020617;
-}
-.bold .highlight {
-  color: #ef4444;
-  font-size: 100px;
-}
+.bold { background: #020617; }
+.bold .highlight { color: #ef4444; font-size: 100px; }
 
 .spiritual {
   background: linear-gradient(180deg,#020617,#041b2d);
@@ -123,10 +134,7 @@ button {
 .royal {
   background: linear-gradient(180deg,#1e0038,#020617);
 }
-.royal .highlight {
-  color: #c084fc;
-  font-size: 96px;
-}
+.royal .highlight { color: #c084fc; font-size: 96px; }
 
 .sunset {
   background: linear-gradient(180deg,#3b0a0a,#020617);
@@ -185,6 +193,9 @@ button {
     <option value="neon">Dark Neon</option>
   </select>
 
+  <input type="file" id="bgImage" accept="image/*" onchange="setBackgroundImage(event)">
+  <button onclick="clearBackground()">Remove Image</button>
+
   <button onclick="renderQuote()">Preview</button>
   <button onclick="downloadImage()">Download</button>
 </div>
@@ -196,6 +207,8 @@ button {
 </div>
 
 <script>
+let bgImageURL = "";
+
 function renderQuote() {
   const text = document.getElementById("quoteText").value.trim();
   const preset = document.getElementById("preset").value;
@@ -230,6 +243,26 @@ function renderQuote() {
   footer.className = "footer";
   footer.textContent = "LegendDetails";
   preview.appendChild(footer);
+}
+
+function setBackgroundImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    bgImageURL = reader.result;
+    document.getElementById("preview").style.setProperty(
+      "--bg-image",
+      `url(${bgImageURL})`
+    );
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearBackground() {
+  bgImageURL = "";
+  document.getElementById("preview").style.setProperty("--bg-image", "none");
 }
 
 function downloadImage() {
