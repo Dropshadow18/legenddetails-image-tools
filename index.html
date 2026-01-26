@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LegendDetails – Quote Studio</title>
+<title>LegendDetails – Premium Quote Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
 
+<!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
@@ -14,68 +16,147 @@ body {
   margin: 0;
   background: #020617;
   color: #fff;
+  font-family: Arial, sans-serif;
 }
+
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: auto;
   padding: 20px;
 }
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
 .controls {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
 }
+
 textarea, select, button {
   padding: 10px;
   border-radius: 6px;
   border: none;
 }
+
+textarea {
+  min-height: 130px;
+}
+
 button {
   background: #facc15;
   font-weight: 600;
   cursor: pointer;
 }
+
 .preview-wrap {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 25px;
 }
+
+/* ===== QUOTE BOX ===== */
 .preview {
   width: 900px;
-  aspect-ratio: 1/1;
-  background: linear-gradient(180deg,#020617,#020617);
-  border-radius: 18px;
+  aspect-ratio: 1 / 1;
   padding: 80px;
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  box-sizing: border-box;
 }
+
 .quote-line {
-  margin-bottom: 30px;
+  margin-bottom: 28px;
   line-height: 1.3;
   word-break: break-word;
 }
+
 .word {
   font-size: 56px;
   font-family: 'Playfair Display', serif;
 }
+
 .highlight {
   font-size: 92px;
-  color: #d4af37;
   font-weight: 600;
 }
-.bold .highlight { color: #ef4444; }
-.spiritual .highlight { color: #a5f3fc; }
 
-.footer {
-  margin-top: auto;
-  opacity: 0.4;
-  font-size: 18px;
-}
+/* Telugu font */
 .telugu .word,
 .telugu .highlight {
   font-family: 'Noto Serif Telugu', serif;
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  font-size: 18px;
+  opacity: 0.4;
+}
+
+/* ===== PRESETS ===== */
+
+.calm {
+  background: #020617;
+}
+.calm .highlight { color: #d4af37; }
+
+.bold {
+  background: #020617;
+}
+.bold .highlight {
+  color: #ef4444;
+  font-size: 100px;
+}
+
+.spiritual {
+  background: linear-gradient(180deg,#020617,#041b2d);
+}
+.spiritual .highlight { color: #a5f3fc; }
+
+.royal {
+  background: linear-gradient(180deg,#1e0038,#020617);
+}
+.royal .highlight {
+  color: #c084fc;
+  font-size: 96px;
+}
+
+.sunset {
+  background: linear-gradient(180deg,#3b0a0a,#020617);
+}
+.sunset .highlight { color: #fb923c; }
+
+.ocean {
+  background: linear-gradient(180deg,#041f2d,#020617);
+}
+.ocean .highlight { color: #38bdf8; }
+
+.mono {
+  background: #000;
+}
+.mono .word { color: #e5e7eb; }
+.mono .highlight {
+  color: #fff;
+  font-size: 80px;
+  text-decoration: underline;
+}
+
+.neon {
+  background: #020617;
+}
+.neon .highlight {
+  color: #22d3ee;
+  font-size: 98px;
+  text-shadow:
+    0 0 6px #22d3ee,
+    0 0 14px #22d3ee;
 }
 </style>
 </head>
@@ -83,26 +164,33 @@ button {
 <body>
 <div class="container">
 
+<h1>Premium Quote Image Studio</h1>
+
 <div class="controls">
-<textarea id="quoteText" placeholder="Paste quote here"></textarea>
+  <textarea id="quoteText" placeholder="Paste quote here..."></textarea>
 
-<select id="language">
-  <option value="en">English</option>
-  <option value="te">Telugu</option>
-</select>
+  <select id="language">
+    <option value="en">English</option>
+    <option value="te">Telugu</option>
+  </select>
 
-<select id="preset">
-  <option value="calm">Calm Wisdom</option>
-  <option value="bold">Bold Motivation</option>
-  <option value="spiritual">Soft Spiritual</option>
-</select>
+  <select id="preset">
+    <option value="calm">Calm Wisdom</option>
+    <option value="bold">Bold Motivation</option>
+    <option value="spiritual">Soft Spiritual</option>
+    <option value="royal">Royal Purple</option>
+    <option value="sunset">Sunset Glow</option>
+    <option value="ocean">Ocean Blue</option>
+    <option value="mono">Minimal Mono</option>
+    <option value="neon">Dark Neon</option>
+  </select>
 
-<button onclick="renderQuote()">Preview</button>
-<button onclick="downloadImage()">Download</button>
+  <button onclick="renderQuote()">Preview</button>
+  <button onclick="downloadImage()">Download</button>
 </div>
 
 <div class="preview-wrap">
-<div id="preview" class="preview calm"></div>
+  <div id="preview" class="preview calm"></div>
 </div>
 
 </div>
@@ -112,10 +200,12 @@ function renderQuote() {
   const text = document.getElementById("quoteText").value.trim();
   const preset = document.getElementById("preset").value;
   const lang = document.getElementById("language").value;
-  const box = document.getElementById("preview");
+  const preview = document.getElementById("preview");
 
-  box.className = `preview ${preset} ${lang === 'te' ? 'telugu' : ''}`;
-  box.innerHTML = "";
+  preview.className = `preview ${preset} ${lang === "te" ? "telugu" : ""}`;
+  preview.innerHTML = "";
+
+  if(!text) return;
 
   const lines = text.split("\n");
 
@@ -126,20 +216,20 @@ function renderQuote() {
     const lineDiv = document.createElement("div");
     lineDiv.className = "quote-line";
 
-    words.forEach((w, i) => {
+    words.forEach((word, i) => {
       const span = document.createElement("span");
-      span.textContent = w + " ";
+      span.textContent = word + " ";
       span.className = i === highlightIndex ? "highlight" : "word";
       lineDiv.appendChild(span);
     });
 
-    box.appendChild(lineDiv);
+    preview.appendChild(lineDiv);
   });
 
   const footer = document.createElement("div");
   footer.className = "footer";
   footer.textContent = "LegendDetails";
-  box.appendChild(footer);
+  preview.appendChild(footer);
 }
 
 function downloadImage() {
@@ -148,7 +238,7 @@ function downloadImage() {
     backgroundColor: null
   }).then(canvas => {
     const link = document.createElement("a");
-    link.download = "premium-quote.png";
+    link.download = "legenddetails-quote.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
   });
