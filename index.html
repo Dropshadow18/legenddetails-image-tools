@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Arial:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
 
 <!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -19,7 +19,7 @@ body {
   font-family:Arial,sans-serif;
 }
 .container{
-  max-width:1200px;
+  max-width:1300px;
   margin:auto;
   padding:20px;
 }
@@ -32,7 +32,7 @@ h1{
   gap:10px;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 }
-textarea, select, button, input[type="file"]{
+textarea, select, button, input[type="file"], input[type="number"], input[type="color"]{
   padding:10px;
   border-radius:6px;
   border:none;
@@ -44,6 +44,7 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
   display:flex;
   justify-content:center;
   margin-top:25px;
+  position:relative;
 }
 
 /* ===== QUOTE BOX ===== */
@@ -80,8 +81,8 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
   word-break:break-word;
 }
 
-.word{font-size:56px;font-family:'Playfair Display',serif;}
-.highlight{font-size:92px;font-weight:600;}
+.word{}
+.highlight{font-weight:600;}
 
 /* Telugu font */
 .telugu .word, .telugu .highlight{font-family:'Noto Serif Telugu',serif;}
@@ -93,20 +94,20 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 .calm{background:#020617;}
 .calm .highlight{color:#d4af37;}
 .bold{background:#020617;}
-.bold .highlight{color:#ef4444;font-size:100px;}
+.bold .highlight{color:#ef4444;}
 .spiritual{background:linear-gradient(180deg,#020617,#041b2d);}
 .spiritual .highlight{color:#a5f3fc;}
 .royal{background:linear-gradient(180deg,#1e0038,#020617);}
-.royal .highlight{color:#c084fc;font-size:96px;}
+.royal .highlight{color:#c084fc;}
 .sunset{background:linear-gradient(180deg,#3b0a0a,#020617);}
 .sunset .highlight{color:#fb923c;}
 .ocean{background:linear-gradient(180deg,#041f2d,#020617);}
 .ocean .highlight{color:#38bdf8;}
 .mono{background:#000;}
 .mono .word{color:#e5e7eb;}
-.mono .highlight{color:#fff;font-size:80px;text-decoration:underline;}
+.mono .highlight{color:#fff;}
 .neon{background:#020617;}
-.neon .highlight{color:#22d3ee;font-size:98px;text-shadow:0 0 6px #22d3ee,0 0 14px #22d3ee;}
+.neon .highlight{color:#22d3ee;text-shadow:0 0 6px #22d3ee,0 0 14px #22d3ee;}
 
 /* ===== IMAGE MODE ===== */
 .image-mode{background:#000 !important;}
@@ -119,14 +120,26 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 .circle{border-radius:50%;}
 .shadow{box-shadow:0 10px 30px rgba(0,0,0,0.6);}
 .outline{border:5px solid #facc15;}
-.solid{border:5px solid #facc15;}
-.dotted{border:5px dotted #facc15;}
-.dashed{border:5px dashed #facc15;}
-.double{border:5px double #facc15;}
-.groove{border:5px groove #facc15;}
-.ridge{border:5px ridge #facc15;}
-.inset{border:5px inset #facc15;}
-.outset{border:5px outset #facc15;}
+.solid{border-style:solid;}
+.dotted{border-style:dotted;}
+.dashed{border-style:dashed;}
+.double{border-style:double;}
+.groove{border-style:groove;}
+.ridge{border-style:ridge;}
+.inset{border-style:inset;}
+.outset{border-style:outset;}
+
+/* ===== WATERMARK ===== */
+.watermark{
+  position:absolute;
+  top:15px;
+  right:20px;
+  font-family:'Playfair Display', serif;
+  font-size:22px;
+  font-weight:600;
+  color:rgba(255,255,255,0.45);
+  z-index:10;
+}
 </style>
 </head>
 <body>
@@ -135,14 +148,14 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 <h1>Premium Quote Image Studio</h1>
 
 <div class="controls">
-<textarea id="quoteText" placeholder="Paste quote here..."></textarea>
+<textarea id="quoteText" placeholder="Paste quote here..." oninput="renderQuote()"></textarea>
 
-<select id="language">
+<select id="language" oninput="renderQuote()">
   <option value="en">English</option>
   <option value="te">Telugu</option>
 </select>
 
-<select id="preset">
+<select id="preset" oninput="renderQuote()">
   <option value="calm">Calm Wisdom</option>
   <option value="bold">Bold Motivation</option>
   <option value="spiritual">Soft Spiritual</option>
@@ -154,16 +167,15 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 </select>
 
 <input type="file" id="bgImage" accept="image/*" onchange="setBackgroundImage(event)">
-<button onclick="clearBackground()">Remove Image</button>
 
-<select id="imageSize">
+<select id="imageSize" oninput="renderQuote()">
   <option value="square">Square 1200×1200</option>
   <option value="portrait">Portrait 900×1125</option>
   <option value="landscape">Landscape 1024×675</option>
   <option value="hd">Full HD 1280×720</option>
 </select>
 
-<select id="borderStyle">
+<select id="borderStyle" oninput="renderQuote()">
   <option value="rounded">Rounded</option>
   <option value="circle">Circle</option>
   <option value="shadow">Shadow</option>
@@ -178,16 +190,17 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
   <option value="outset">Outset</option>
 </select>
 
-<select id="fontType">
+<input type="color" id="borderColor" value="#facc15" oninput="renderQuote()">
+<input type="color" id="wordColor" value="#ffffff" oninput="renderQuote()">
+<input type="color" id="highlightColor" value="#facc15" oninput="renderQuote()">
+
+<input type="number" id="wordSize" min="10" max="300" value="56" oninput="renderQuote()">
+<input type="number" id="highlightSize" min="10" max="300" value="92" oninput="renderQuote()">
+
+<select id="fontType" oninput="renderQuote()">
   <option value="Playfair Display">Playfair Display</option>
   <option value="Arial, sans-serif">Sans-serif</option>
   <option value="Noto Serif Telugu">Noto Serif Telugu</option>
-</select>
-
-<select id="fontSize">
-  <option value="small">Small</option>
-  <option value="medium" selected>Medium</option>
-  <option value="large">Large</option>
 </select>
 
 <button onclick="renderQuote()">Preview</button>
@@ -195,27 +208,26 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 </div>
 
 <div class="preview-wrap">
-  <div id="preview" class="preview calm rounded"></div>
+<div class="preview calm rounded" id="preview">
+  <div class="watermark">LegendDetails.Blogspot.Com</div>
+</div>
 </div>
 
 </div>
 
 <script>
 let bgImageURL="";
-
 function renderQuote(){
   const text=document.getElementById("quoteText").value.trim();
   const preset=document.getElementById("preset").value;
   const lang=document.getElementById("language").value;
   const preview=document.getElementById("preview");
+  
+  // Reset classes
   preview.className=`preview ${preset} ${lang==='te'?'telugu':''}`;
-
+  preview.classList.add(document.getElementById("borderStyle").value);
   if(bgImageURL) preview.classList.add("image-mode");
-
-  // Border style
-  const borderStyle=document.getElementById("borderStyle").value;
-  preview.classList.add(borderStyle);
-
+  
   // Image sizes
   const size=document.getElementById("imageSize").value;
   if(size==='square'){ preview.style.width='1200px'; preview.style.aspectRatio='1/1'; }
@@ -223,17 +235,18 @@ function renderQuote(){
   if(size==='landscape'){ preview.style.width='1024px'; preview.style.aspectRatio='16/9'; }
   if(size==='hd'){ preview.style.width='1280px'; preview.style.aspectRatio='16/9'; }
 
-  preview.innerHTML='';
+  // Border color
+  preview.style.borderColor=document.getElementById("borderColor").value;
 
+  // Clear previous text
+  preview.innerHTML='<div class="watermark">LegendDetails.Blogspot.Com</div>';
   if(!text) return;
 
-  // Fonts
   const fontType=document.getElementById("fontType").value;
-  const fontSize=document.getElementById("fontSize").value;
-  let wordSize=56, highlightSize=92;
-  if(fontSize==='small'){ wordSize=40; highlightSize=70; }
-  if(fontSize==='medium'){ wordSize=56; highlightSize=92; }
-  if(fontSize==='large'){ wordSize=72; highlightSize=110; }
+  const wordSize=parseInt(document.getElementById("wordSize").value);
+  const highlightSize=parseInt(document.getElementById("highlightSize").value);
+  const wordColor=document.getElementById("wordColor").value;
+  const highlightColor=document.getElementById("highlightColor").value;
 
   const lines=text.split("\n");
   lines.forEach(line=>{
@@ -246,16 +259,12 @@ function renderQuote(){
       span.textContent=word+" ";
       span.style.fontFamily=fontType;
       span.style.fontSize=(i===highlightIndex?highlightSize:wordSize)+"px";
+      span.style.color=(i===highlightIndex?highlightColor:wordColor);
       span.className=i===highlightIndex?"highlight":"word";
       lineDiv.appendChild(span);
     });
     preview.appendChild(lineDiv);
   });
-
-  const footer=document.createElement("div");
-  footer.className="footer";
-  footer.textContent="LegendDetails";
-  preview.appendChild(footer);
 }
 
 function setBackgroundImage(e){
@@ -267,6 +276,7 @@ function setBackgroundImage(e){
     const preview=document.getElementById("preview");
     preview.style.setProperty("--bg-image",`url(${bgImageURL})`);
     preview.classList.add("image-mode");
+    renderQuote();
   };
   reader.readAsDataURL(file);
 }
@@ -276,6 +286,7 @@ function clearBackground(){
   const preview=document.getElementById("preview");
   preview.style.setProperty("--bg-image","none");
   preview.classList.remove("image-mode");
+  renderQuote();
 }
 
 function downloadImage(){
