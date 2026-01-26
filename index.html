@@ -208,4 +208,63 @@ function renderQuote() {
   const lines = text.split("\n");
 
   lines.forEach(line => {
-    const words = line.spl
+    const words = line.split(" ");
+    const highlightIndex = Math.floor(words.length / 2);
+
+    const lineDiv = document.createElement("div");
+    lineDiv.className = "quote-line";
+
+    words.forEach((word, i) => {
+      const span = document.createElement("span");
+      span.textContent = word + " ";
+      span.className = i === highlightIndex ? "highlight" : "word";
+      lineDiv.appendChild(span);
+    });
+
+    preview.appendChild(lineDiv);
+  });
+
+  const footer = document.createElement("div");
+  footer.className = "footer";
+  footer.textContent = "LegendDetails";
+  preview.appendChild(footer);
+}
+
+function setBackgroundImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    bgImageURL = reader.result;
+    const preview = document.getElementById("preview");
+    preview.style.setProperty("--bg-image", `url(${bgImageURL})`);
+    preview.classList.add("image-mode");
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearBackground() {
+  bgImageURL = "";
+  const preview = document.getElementById("preview");
+  preview.style.setProperty("--bg-image", "none");
+  preview.classList.remove("image-mode");
+}
+
+function downloadImage() {
+  html2canvas(document.getElementById("preview"), {
+    scale: 2,
+    backgroundColor: null
+  }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "legenddetails-quote.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+
+renderQuote();
+</script>
+
+</body>
+</html>
