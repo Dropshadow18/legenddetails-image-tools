@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LegendDetails – Premium Quote Studio</title>
+<title>LegendDetails – Auto Quote Presets</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Serif+Telugu:wght@400;600&display=swap" rel="stylesheet">
@@ -14,34 +14,47 @@ body {
   color: #fff;
   font-family: 'Playfair Display', serif;
 }
+
 .container {
   max-width: 1200px;
   margin: auto;
   padding: 20px;
 }
-h1 { text-align: center; }
+
+h1 {
+  text-align: center;
+  font-weight: 600;
+}
 
 .controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
   gap: 10px;
 }
+
 textarea, select, button {
   padding: 10px;
   border-radius: 6px;
   border: none;
+  font-size: 14px;
 }
-textarea { min-height: 140px; }
+
+textarea {
+  min-height: 130px;
+}
+
 button {
   background: #facc15;
   font-weight: 600;
   cursor: pointer;
 }
+
 .preview {
   display: flex;
   justify-content: center;
   margin-top: 20px;
 }
+
 canvas {
   width: 100%;
   max-width: 900px;
@@ -56,23 +69,21 @@ canvas {
 <h1>Premium Quote Image Studio</h1>
 
 <div class="controls">
-<textarea id="quoteText" placeholder="Use:
-[word|color|size]
-
+<textarea id="quoteText" placeholder="Paste quote here (English / Telugu)
 Example:
-Success is not [final|gold|120]
-It is the [courage|white|150] to continue"></textarea>
+Life does not get easier
+You get stronger with courage"></textarea>
 
 <select id="language">
   <option value="en">English</option>
   <option value="te">Telugu</option>
 </select>
 
-<select id="template">
-  <option value="center">Minimal Center</option>
-  <option value="left">Editorial Left</option>
-  <option value="focus">Highlight Focus</option>
-  <option value="box">Boxed Quote</option>
+<select id="preset">
+  <option value="calm">Calm Wisdom</option>
+  <option value="bold">Bold Motivation</option>
+  <option value="hero">Hero Word</option>
+  <option value="spiritual">Soft Spiritual</option>
 </select>
 
 <button onclick="renderQuote()">Preview</button>
@@ -90,78 +101,71 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 function renderQuote() {
-  const text = document.getElementById("quoteText").value;
+  const text = document.getElementById("quoteText").value.trim();
   const lang = document.getElementById("language").value;
-  const template = document.getElementById("template").value;
+  const preset = document.getElementById("preset").value;
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
+  // Background
   ctx.fillStyle = "#020617";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  let baseFont = lang === "te"
+  const fontFamily = lang === "te"
     ? "'Noto Serif Telugu'"
     : "'Playfair Display'";
 
-  let align = "center";
-  let startX = canvas.width / 2;
-  let startY = canvas.height / 2 - 300;
-  let lineGap = 160;
+  let startY = 700;
+  let lineGap = 170;
+  let baseSize = 96;
+  let highlightSize = 140;
+  let highlightColor = "#d4af37";
 
-  if(template === "left") {
-    align = "left";
-    startX = 300;
+  if(preset === "bold") {
+    highlightColor = "#ef4444";
+    highlightSize = 150;
   }
-  if(template === "focus") {
+  if(preset === "hero") {
+    highlightColor = "#facc15";
+    highlightSize = 170;
     lineGap = 190;
   }
-  if(template === "box") {
-    ctx.fillStyle = "rgba(0,0,0,0.55)";
-    ctx.fillRect(350,700,1700,900);
-    ctx.fillStyle = "#fff";
+  if(preset === "spiritual") {
+    highlightColor = "#a5f3fc";
+    highlightSize = 140;
   }
 
-  ctx.textAlign = align;
+  ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
+  let lines = text.split("\n");
   let y = startY;
 
-  text.split("\n").forEach(line => {
-    let x = startX;
-    parseLine(line).forEach(part => {
-      let size = part.size || (template === "focus" ? 120 : 96);
-      ctx.font = `${size}px ${baseFont}`;
-      ctx.fillStyle = part.color || "#f8fafc";
-      ctx.fillText(part.text, x, y);
-      x += ctx.measureText(part.text).width;
+  lines.forEach(line => {
+    let words = line.split(" ");
+    let highlightIndex = Math.floor(words.length / 2);
+
+    let x = canvas.width / 2;
+
+    words.forEach((word, i) => {
+      let isHighlight = i === highlightIndex;
+
+      ctx.font = `${isHighlight ? highlightSize : baseSize}px ${fontFamily}`;
+      ctx.fillStyle = isHighlight ? highlightColor : "#f8fafc";
+
+      ctx.fillText(word + " ", x, y);
+      x += ctx.measureText(word + " ").width;
     });
+
     y += lineGap;
   });
 
+  // Footer
   ctx.globalAlpha = 0.35;
   ctx.font = "36px Arial";
   ctx.fillStyle = "#fff";
   ctx.fillText("LegendDetails", canvas.width / 2, canvas.height - 120);
   ctx.globalAlpha = 1;
-}
-
-function parseLine(line) {
-  let regex = /\[(.*?)\|(.*?)\|(.*?)\]/g;
-  let out = [];
-  let last = 0;
-  let m;
-
-  while((m = regex.exec(line)) !== null) {
-    if(m.index > last) out.push({ text: line.substring(last,m.index) });
-    out.push({
-      text: m[1],
-      color: m[2] === "gold" ? "#d4af37" : m[2],
-      size: parseInt(m[3])
-    });
-    last = regex.lastIndex;
-  }
-  if(last < line.length) out.push({ text: line.substring(last) });
-  return out;
 }
 
 function downloadImage() {
