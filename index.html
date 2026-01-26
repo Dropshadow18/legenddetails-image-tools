@@ -50,13 +50,6 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 .quote-line{margin-bottom:28px;line-height:1.3;word-break:break-word;}
 .word{} .highlight{font-weight:700;}
 
-/* Language-specific fonts */
-.lang-en .word,.lang-en .highlight{font-family:'Playfair Display', serif;}
-.lang-te .word,.lang-te .highlight{font-family:'Noto Serif Telugu', serif;}
-.lang-hi .word,.lang-hi .highlight{font-family:'Noto Sans Devanagari', sans-serif;}
-.lang-ta .word,.lang-ta .highlight{font-family:'Noto Sans Tamil', sans-serif;}
-.lang-kn .word,.lang-kn .highlight{font-family:'Noto Sans Kannada', sans-serif;}
-
 /* Borders */
 .rounded{border-radius:18px;}
 .circle{border-radius:50%;}
@@ -105,7 +98,7 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 <option value="kn">Kannada</option>
 </select>
 
-<label>Font Family</label>
+<label>Font Family (English only)</label>
 <select id="fontType" oninput="renderQuote()">
 <option value="Playfair Display">Playfair Display</option>
 <option value="Roboto Slab">Roboto Slab</option>
@@ -124,6 +117,9 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 <input type="color" id="wordShadowColor" value="#000000" oninput="renderQuote()">
 <label>Text Shadow (Highlight)</label>
 <input type="color" id="highlightShadowColor" value="#000000" oninput="renderQuote()">
+
+<label>Special Word Color</label>
+<input type="color" id="highlightColor" value="#facc15" oninput="renderQuote()">
 
 <input type="file" id="bgImage" accept="image/*" onchange="setBackgroundImage(event)">
 
@@ -172,6 +168,14 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 let bgImageURL="";
 let boldActive=false, italicActive=false;
 
+const langFonts = {
+  en: null,
+  te: "Noto Serif Telugu",
+  hi: "Noto Sans Devanagari",
+  ta: "Noto Sans Tamil",
+  kn: "Noto Sans Kannada"
+};
+
 document.getElementById('boldBtn').onclick=()=>{
   boldActive=!boldActive; renderQuote();
 };
@@ -208,9 +212,11 @@ function renderQuote(){
   const wordSize=parseInt(document.getElementById("wordSize").value);
   const highlightSize=parseInt(document.getElementById("highlightSize").value);
   const wordColor="#ffffff";
-  const highlightColor="#facc15";
+  const highlightColor=document.getElementById("highlightColor").value;
   const wordShadow=document.getElementById("wordShadowColor").value;
   const highlightShadow=document.getElementById("highlightShadowColor").value;
+
+  const langFont = langFonts[lang] || fontType;
 
   const lines=text.split("\n");
   lines.forEach(line=>{
@@ -221,7 +227,7 @@ function renderQuote(){
     words.forEach((word,i)=>{
       const span=document.createElement("span");
       span.textContent=word+" ";
-      span.style.fontFamily=fontType;
+      span.style.fontFamily=langFont;
       span.style.fontSize=(i===highlightIndex?highlightSize:wordSize)+"px";
       span.style.color=(i===highlightIndex?highlightColor:wordColor);
       span.style.textShadow=(i===highlightIndex?`2px 2px 4px ${highlightShadow}`:`2px 2px 2px ${wordShadow}`);
