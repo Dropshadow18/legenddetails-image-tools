@@ -222,18 +222,21 @@ function renderQuote(){
   const preset=document.getElementById("preset").value;
   const lang=document.getElementById("language").value;
   const preview=document.getElementById("preview");
-  
+
   // Reset classes
   preview.className=`preview ${preset} ${lang==='te'?'telugu':''}`;
   preview.classList.add(document.getElementById("borderStyle").value);
   if(bgImageURL) preview.classList.add("image-mode");
-  
+
   // Image sizes
   const size=document.getElementById("imageSize").value;
-  if(size==='square'){ preview.style.width='1200px'; preview.style.aspectRatio='1/1'; }
-  if(size==='portrait'){ preview.style.width='900px'; preview.style.aspectRatio='4/5'; }
-  if(size==='landscape'){ preview.style.width='1024px'; preview.style.aspectRatio='16/9'; }
-  if(size==='hd'){ preview.style.width='1280px'; preview.style.aspectRatio='16/9'; }
+  let w=1024, h=576;
+  if(size==='square'){ w=1200; h=1200; }
+  if(size==='portrait'){ w=900; h=1125; }
+  if(size==='landscape'){ w=1024; h=675; }
+  if(size==='hd'){ w=1280; h=720; }
+  preview.style.width=w+'px';
+  preview.style.height=h+'px';
 
   // Border color
   preview.style.borderColor=document.getElementById("borderColor").value;
