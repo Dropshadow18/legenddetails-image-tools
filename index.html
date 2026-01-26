@@ -18,39 +18,27 @@ body {
   color: #fff;
   font-family: Arial, sans-serif;
 }
-
 .container {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: auto;
   padding: 20px;
 }
-
 h1 {
   text-align: center;
   margin-bottom: 20px;
 }
-
 .controls {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
 }
-
 textarea, select, button, input[type="file"] {
   padding: 10px;
   border-radius: 6px;
   border: none;
 }
-
-textarea {
-  min-height: 130px;
-}
-
-button {
-  background: #facc15;
-  font-weight: 600;
-  cursor: pointer;
-}
+textarea { min-height: 130px; }
+button { background: #facc15; font-weight: 600; cursor: pointer; }
 
 .preview-wrap {
   display: flex;
@@ -61,7 +49,7 @@ button {
 /* ===== QUOTE BOX ===== */
 .preview {
   width: 900px;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1/1;
   padding: 80px;
   border-radius: 18px;
   display: flex;
@@ -96,28 +84,14 @@ button {
   word-break: break-word;
 }
 
-.word {
-  font-size: 56px;
-  font-family: 'Playfair Display', serif;
-}
-
-.highlight {
-  font-size: 92px;
-  font-weight: 600;
-}
+.word { font-size: 56px; font-family: 'Playfair Display', serif; }
+.highlight { font-size: 92px; font-weight: 600; }
 
 /* Telugu font */
-.telugu .word,
-.telugu .highlight {
-  font-family: 'Noto Serif Telugu', serif;
-}
+.telugu .word, .telugu .highlight { font-family: 'Noto Serif Telugu', serif; }
 
 /* Footer */
-.footer {
-  margin-top: auto;
-  font-size: 18px;
-  opacity: 0.4;
-}
+.footer { margin-top: auto; font-size: 18px; opacity: 0.4; }
 
 /* ===== PRESETS ===== */
 .calm { background: #020617; }
@@ -150,9 +124,14 @@ button {
 .image-mode::before { opacity: 0.55 !important; }
 .image-mode .word { text-shadow: 0 2px 6px rgba(0,0,0,0.8); }
 .image-mode .highlight { text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+
+/* ===== BORDER STYLES ===== */
+.rounded { border-radius: 18px; }
+.circle { border-radius: 50%; }
+.shadow { box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.outline { border: 5px solid #facc15; }
 </style>
 </head>
-
 <body>
 <div class="container">
 
@@ -180,12 +159,37 @@ button {
   <input type="file" id="bgImage" accept="image/*" onchange="setBackgroundImage(event)">
   <button onclick="clearBackground()">Remove Image</button>
 
+  <select id="imageSize">
+    <option value="square">Square (1:1)</option>
+    <option value="portrait">Portrait (4:5)</option>
+    <option value="landscape">Landscape (16:9)</option>
+  </select>
+
+  <select id="borderStyle">
+    <option value="rounded">Rounded</option>
+    <option value="circle">Circle</option>
+    <option value="shadow">Shadow</option>
+    <option value="outline">Outline</option>
+  </select>
+
+  <select id="fontType">
+    <option value="Playfair Display">Playfair Display</option>
+    <option value="Arial, sans-serif">Sans-serif</option>
+    <option value="Noto Serif Telugu">Noto Serif Telugu</option>
+  </select>
+
+  <select id="fontSize">
+    <option value="small">Small</option>
+    <option value="medium" selected>Medium</option>
+    <option value="large">Large</option>
+  </select>
+
   <button onclick="renderQuote()">Preview</button>
   <button onclick="downloadImage()">Download</button>
 </div>
 
 <div class="preview-wrap">
-  <div id="preview" class="preview calm"></div>
+  <div id="preview" class="preview calm rounded"></div>
 </div>
 
 </div>
@@ -199,66 +203,81 @@ function renderQuote() {
   const lang = document.getElementById("language").value;
   const preview = document.getElementById("preview");
 
-  preview.className = `preview ${preset} ${lang === "te" ? "telugu" : ""}`;
+  preview.className = `preview ${preset} ${lang==='te'?'telugu':''}`;
+
+  // Apply image mode
   if(bgImageURL) preview.classList.add("image-mode");
-  preview.innerHTML = "";
+
+  // Apply border style
+  const borderStyle = document.getElementById("borderStyle").value;
+  preview.classList.add(borderStyle);
+
+  // Set image size
+  const size = document.getElementById("imageSize").value;
+  if(size==='square'){ preview.style.width='900px'; preview.style.aspectRatio='1/1'; }
+  if(size==='portrait'){ preview.style.width='900px'; preview.style.aspectRatio='4/5'; }
+  if(size==='landscape'){ preview.style.width='1280px'; preview.style.aspectRatio='16/9'; }
+
+  // Clear previous text
+  preview.innerHTML='';
 
   if(!text) return;
 
+  const fontType = document.getElementById("fontType").value;
+  const fontSize = document.getElementById("fontSize").value;
+  let wordSize=56, highlightSize=92;
+  if(fontSize==='small'){ wordSize=40; highlightSize=70; }
+  if(fontSize==='medium'){ wordSize=56; highlightSize=92; }
+  if(fontSize==='large'){ wordSize=72; highlightSize=110; }
+
   const lines = text.split("\n");
-
-  lines.forEach(line => {
-    const words = line.split(" ");
-    const highlightIndex = Math.floor(words.length / 2);
-
-    const lineDiv = document.createElement("div");
-    lineDiv.className = "quote-line";
-
-    words.forEach((word, i) => {
-      const span = document.createElement("span");
-      span.textContent = word + " ";
-      span.className = i === highlightIndex ? "highlight" : "word";
+  lines.forEach(line=>{
+    const words=line.split(" ");
+    const highlightIndex=Math.floor(words.length/2);
+    const lineDiv=document.createElement("div");
+    lineDiv.className="quote-line";
+    words.forEach((word,i)=>{
+      const span=document.createElement("span");
+      span.textContent=word+" ";
+      span.style.fontFamily=fontType;
+      span.style.fontSize=(i===highlightIndex?highlightSize:wordSize)+"px";
+      span.className=i===highlightIndex?"highlight":"word";
       lineDiv.appendChild(span);
     });
-
     preview.appendChild(lineDiv);
   });
 
-  const footer = document.createElement("div");
-  footer.className = "footer";
-  footer.textContent = "LegendDetails";
+  const footer=document.createElement("div");
+  footer.className="footer";
+  footer.textContent="LegendDetails";
   preview.appendChild(footer);
 }
 
-function setBackgroundImage(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    bgImageURL = reader.result;
-    const preview = document.getElementById("preview");
+function setBackgroundImage(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    bgImageURL=reader.result;
+    const preview=document.getElementById("preview");
     preview.style.setProperty("--bg-image", `url(${bgImageURL})`);
     preview.classList.add("image-mode");
   };
   reader.readAsDataURL(file);
 }
 
-function clearBackground() {
-  bgImageURL = "";
-  const preview = document.getElementById("preview");
-  preview.style.setProperty("--bg-image", "none");
+function clearBackground(){
+  bgImageURL="";
+  const preview=document.getElementById("preview");
+  preview.style.setProperty("--bg-image","none");
   preview.classList.remove("image-mode");
 }
 
-function downloadImage() {
-  html2canvas(document.getElementById("preview"), {
-    scale: 2,
-    backgroundColor: null
-  }).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "legenddetails-quote.png";
-    link.href = canvas.toDataURL("image/png");
+function downloadImage(){
+  html2canvas(document.getElementById("preview"),{scale:2,backgroundColor:null}).then(canvas=>{
+    const link=document.createElement("a");
+    link.download="legenddetails-quote.png";
+    link.href=canvas.toDataURL("image/png");
     link.click();
   });
 }
