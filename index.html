@@ -14,154 +14,150 @@ body {
   color: #fff;
   font-family: 'Playfair Display', serif;
 }
-
 .container {
   max-width: 1200px;
   margin: auto;
   padding: 20px;
 }
-
 h1 { text-align: center; }
-
 .controls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
   gap: 10px;
-  margin-bottom: 20px;
 }
-
-textarea, input, select, button {
+textarea, select, button {
   padding: 10px;
   border-radius: 6px;
   border: none;
-  font-size: 14px;
 }
-
-textarea { min-height: 120px; }
-
+textarea { min-height: 140px; }
 button {
   background: #facc15;
   font-weight: 600;
   cursor: pointer;
 }
-
+.preview { display: flex; justify-content: center; margin-top: 20px; }
 canvas {
   width: 100%;
   max-width: 900px;
   border-radius: 14px;
 }
-.preview { display: flex; justify-content: center; }
+.tip {
+  opacity: 0.6;
+  font-size: 13px;
+  margin-top: 5px;
+}
 </style>
 </head>
 
 <body>
 <div class="container">
+
 <h1>Premium Quote Image Studio</h1>
 
 <div class="controls">
-<textarea id="quoteText" placeholder="Enter quote"></textarea>
-<input id="highlightWord" placeholder="Highlight word">
+<textarea id="quoteText" placeholder="Use format:
+[word|color|size]
+
+Example:
+Success is not [final|gold|120]
+It is the [courage|white|140] to continue"></textarea>
+
 <select id="language">
   <option value="en">English</option>
   <option value="te">Telugu</option>
 </select>
 
-<select id="style">
-  <option value="center">Minimal Center</option>
-  <option value="left">Editorial Left</option>
-  <option value="box">Boxed Quote</option>
-</select>
-
-<input type="file" id="bgUpload" accept="image/*">
 <button onclick="renderQuote()">Preview</button>
-<button onclick="downloadImage()">Download 2× Image</button>
+<button onclick="downloadImage()">Download Image</button>
 </div>
+
+<div class="tip">Tip: Colors can be gold, red, white or hex (#d4af37)</div>
 
 <div class="preview">
 <canvas id="canvas" width="2400" height="2400"></canvas>
 </div>
+
 </div>
 
 <script>
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-let bgImg = null;
-
-document.getElementById("bgUpload").onchange = e => {
-  const img = new Image();
-  img.onload = () => { bgImg = img; renderQuote(); };
-  img.src = URL.createObjectURL(e.target.files[0]);
-};
 
 function renderQuote() {
   const text = document.getElementById("quoteText").value;
-  const highlight = document.getElementById("highlightWord").value;
   const lang = document.getElementById("language").value;
-  const style = document.getElementById("style").value;
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  if (bgImg) {
-    ctx.drawImage(bgImg,0,0,canvas.width,canvas.height);
-    ctx.fillStyle = "rgba(0,0,0,0.55)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-  } else {
-    ctx.fillStyle = "#020617";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-  }
+  // Background
+  ctx.fillStyle = "#020617";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
+  ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = "#f8fafc";
 
-  ctx.font = lang === "te"
-    ? "96px 'Noto Serif Telugu'"
-    : "96px 'Playfair Display'";
+  let baseFont = lang === "te"
+    ? "'Noto Serif Telugu'"
+    : "'Playfair Display'";
 
-  let x = canvas.width/2;
-  let y = canvas.height/2;
+  let y = canvas.height / 2 - 200;
 
-  if(style === "left") {
-    ctx.textAlign = "left";
-    x = 300;
-  } else {
-    ctx.textAlign = "center";
-  }
+  text.split("\n").forEach(line => {
+    let x = canvas.width / 2;
+    let parts = parseLine(line);
 
-  if(style === "box") {
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.fillRect(400,900,1600,600);
-    ctx.fillStyle = "#fff";
-  }
+    parts.forEach(p => {
+      ctx.font = `${p.size || 96}px ${baseFont}`;
+      ctx.fillStyle = p.color || "#f8fafc";
+      ctx.fillText(p.text, x, y);
+      x += ctx.measureText(p.text).width;
+    });
 
-  const lines = text.split("\n");
-  lines.forEach((line,i)=>{
-    let yy = y + (i * 120);
-    if(highlight && line.includes(highlight)){
-      ctx.fillText(line.replace(highlight,""),x,yy);
-      ctx.fillStyle="#facc15";
-      ctx.font=lang==="te"?"120px 'Noto Serif Telugu'":"120px 'Playfair Display'";
-      ctx.fillText(highlight,x,yy+120);
-      ctx.fillStyle="#fff";
-      ctx.font=lang==="te"?"96px 'Noto Serif Telugu'":"96px 'Playfair Display'";
-    } else {
-      ctx.fillText(line,x,yy);
-    }
+    y += 150;
   });
 
   ctx.globalAlpha = 0.4;
-  ctx.font="36px Arial";
-  ctx.fillText("LegendDetails",canvas.width/2,canvas.height-120);
+  ctx.font = "36px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("LegendDetails", canvas.width / 2, canvas.height - 120);
   ctx.globalAlpha = 1;
 }
 
+function parseLine(line) {
+  let regex = /\[(.*?)\|(.*?)\|(.*?)\]/g;
+  let result = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(line)) !== null) {
+    if (match.index > lastIndex) {
+      result.push({ text: line.substring(lastIndex, match.index) });
+    }
+    result.push({
+      text: match[1],
+      color: match[2] === "gold" ? "#d4af37" : match[2],
+      size: parseInt(match[3])
+    });
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < line.length) {
+    result.push({ text: line.substring(lastIndex) });
+  }
+
+  return result;
+}
+
 function downloadImage() {
-  const link=document.createElement("a");
-  link.download="premium-quote-2x.png";
-  link.href=canvas.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.download = "premium-quote.png";
+  link.href = canvas.toDataURL("image/png");
   link.click();
 }
 
 renderQuote();
 </script>
+
 </body>
 </html>
