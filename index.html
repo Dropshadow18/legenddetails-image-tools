@@ -15,13 +15,12 @@ body{margin:0;background:#020617;color:#fff;font-family:Arial,sans-serif;}
 .container{max-width:1300px;margin:auto;padding:20px;}
 h1{text-align:center;margin-bottom:20px;}
 .controls{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
-textarea, select, input[type="file"], input[type="number"], input[type="color"], button{padding:10px;border-radius:6px;border:none;}
+textarea, select, input, button{padding:10px;border-radius:6px;border:none;}
 textarea{min-height:130px;}
 button{background:#facc15;font-weight:600;cursor:pointer;}
-.toggle-btn{padding:10px 15px;margin-top:5px;font-weight:600;cursor:pointer;}
+.toggle-btn{font-weight:600;cursor:pointer;}
 
-/* Preview box */
-.preview-wrap{display:flex;justify-content:center;margin-top:25px;position:relative;}
+.preview-wrap{display:flex;justify-content:center;margin-top:25px;}
 .preview{
   width:1024px;
   aspect-ratio:16/9;
@@ -31,7 +30,6 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
   flex-direction:column;
   justify-content:center;
   text-align:center;
-  box-sizing:border-box;
   position:relative;
   overflow:hidden;
   background:#111;
@@ -44,52 +42,37 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
   background-size:cover;
   background-position:center;
   opacity:0.45;
-  z-index:0;
 }
 .preview>*{position:relative;z-index:1;}
-.quote-line{margin-bottom:28px;line-height:1.3;word-break:break-word;}
-.word{} .highlight{font-weight:700;}
+.quote-line{margin-bottom:28px;line-height:1.3;}
+.highlight{
+  font-weight:700;
+  background:linear-gradient(90deg,var(--hc1),var(--hc2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.word{color:#fff;}
 
-/* Borders */
-.rounded{border-radius:18px;}
-.circle{border-radius:50%;}
-.shadow{box-shadow:0 10px 30px rgba(0,0,0,0.6);}
-.outline{border:5px solid #facc15;}
-.solid{border-style:solid;}
-.dotted{border-style:dotted;}
-.dashed{border-style:dashed;}
-.double{border-style:double;}
-.groove{border-style:groove;}
-.ridge{border-style:ridge;}
-.inset{border-style:inset;}
-.outset{border-style:outset;}
-
-/* Watermark */
 .watermark{
   position:absolute;
   top:15px;
   right:20px;
-  font-family:'Playfair Display', serif;
   font-size:22px;
-  font-weight:600;
-  color:rgba(255,255,255,0.45);
-  z-index:10;
+  opacity:0.45;
 }
 
-/* Image mode shadow */
 .image-mode .word{text-shadow:2px 2px 4px rgba(0,0,0,0.8);}
 .image-mode .highlight{text-shadow:2px 2px 8px rgba(0,0,0,0.9);}
 </style>
 </head>
+
 <body>
 <div class="container">
 <h1>LegendDetails Premium Quote Studio</h1>
 
 <div class="controls">
-
 <textarea id="quoteText" placeholder="Paste quote here..." oninput="renderQuote()"></textarea>
 
-<label>Language</label>
 <select id="language" oninput="renderQuote()">
 <option value="en">English</option>
 <option value="te">Telugu</option>
@@ -98,169 +81,101 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 <option value="kn">Kannada</option>
 </select>
 
-<label>Font Family (English only)</label>
 <select id="fontType" oninput="renderQuote()">
 <option value="Playfair Display">Playfair Display</option>
 <option value="Roboto Slab">Roboto Slab</option>
 <option value="Arial, sans-serif">Arial</option>
 </select>
 
-<label>Word Size</label>
-<input type="number" id="wordSize" min="10" max="300" value="56" oninput="renderQuote()">
-<label>Highlight Size</label>
-<input type="number" id="highlightSize" min="10" max="300" value="92" oninput="renderQuote()">
+<input type="number" id="wordSize" value="56" oninput="renderQuote()">
+<input type="number" id="highlightSize" value="92" oninput="renderQuote()">
 
-<button class="toggle-btn" id="boldBtn">Bold</button>
-<button class="toggle-btn" id="italicBtn">Italic</button>
+<button class="toggle-btn" onclick="toggleBold()">Bold</button>
+<button class="toggle-btn" onclick="toggleItalic()">Italic</button>
 
-<label>Text Shadow (Normal)</label>
-<input type="color" id="wordShadowColor" value="#000000" oninput="renderQuote()">
-<label>Text Shadow (Highlight)</label>
-<input type="color" id="highlightShadowColor" value="#000000" oninput="renderQuote()">
+<label>Highlight Color 1</label>
+<input type="color" id="hc1" value="#facc15" oninput="renderQuote()">
 
-<label>Special Word Color</label>
-<input type="color" id="highlightColor" value="#facc15" oninput="renderQuote()">
+<label>Highlight Color 2</label>
+<input type="color" id="hc2" value="#f97316" oninput="renderQuote()">
 
-<input type="file" id="bgImage" accept="image/*" onchange="setBackgroundImage(event)">
+<input type="file" accept="image/*" onchange="setBg(event)">
 
-<label>Image Size</label>
 <select id="imageSize" oninput="renderQuote()">
-<option value="square">Square 1200×1200</option>
-<option value="portrait">Portrait 900×1125</option>
-<option value="landscape">Landscape 1024×675</option>
-<option value="hd">Full HD 1280×720</option>
+<option value="square">Square</option>
+<option value="portrait">Portrait</option>
+<option value="landscape">Landscape</option>
+<option value="hd">HD</option>
 </select>
 
-<label>Border Style</label>
-<select id="borderStyle" oninput="renderQuote()">
-<option value="rounded">Rounded</option>
-<option value="circle">Circle</option>
-<option value="shadow">Shadow</option>
-<option value="outline">Outline</option>
-<option value="solid">Solid</option>
-<option value="dotted">Dotted</option>
-<option value="dashed">Dashed</option>
-<option value="double">Double</option>
-<option value="groove">Groove</option>
-<option value="ridge">Ridge</option>
-<option value="inset">Inset</option>
-<option value="outset">Outset</option>
-</select>
+<input type="text" id="imageName" value="legenddetails-quote">
 
-<label>Border Color</label>
-<input type="color" id="borderColor" value="#facc15" oninput="renderQuote()">
-
-<label>Image Name (Blogger)</label>
-<input type="text" id="imageName" placeholder="legenddetails-quote" value="legenddetails-quote">
-
-<button onclick="downloadImage()">Download</button>
-
+<button onclick="downloadImage()">Download JPG</button>
 </div>
 
 <div class="preview-wrap">
-<div class="preview rounded" id="preview">
+<div class="preview" id="preview">
 <div class="watermark">LegendDetails.Blogspot.Com</div>
 </div>
 </div>
 </div>
 
 <script>
-let bgImageURL="";
-let boldActive=false, italicActive=false;
-
-const langFonts = {
-  en: null,
-  te: "Noto Serif Telugu",
-  hi: "Noto Sans Devanagari",
-  ta: "Noto Sans Tamil",
-  kn: "Noto Sans Kannada"
+let bold=false, italic=false, bgImg="";
+const langFonts={
+  en:null,
+  te:"Noto Serif Telugu",
+  hi:"Noto Sans Devanagari",
+  ta:"Noto Sans Tamil",
+  kn:"Noto Sans Kannada"
 };
 
-document.getElementById('boldBtn').onclick=()=>{
-  boldActive=!boldActive; renderQuote();
-};
-document.getElementById('italicBtn').onclick=()=>{
-  italicActive=!italicActive; renderQuote();
-};
+function toggleBold(){bold=!bold;renderQuote();}
+function toggleItalic(){italic=!italic;renderQuote();}
 
 function renderQuote(){
   const text=document.getElementById("quoteText").value.trim();
-  const preview=document.getElementById("preview");
+  const p=document.getElementById("preview");
   const lang=document.getElementById("language").value;
-  const langClass="lang-"+lang;
+  const font=langFonts[lang]||document.getElementById("fontType").value;
 
-  preview.className=`preview ${langClass} ${document.getElementById("borderStyle").value}`;
-  if(bgImageURL) preview.classList.add("image-mode");
+  p.innerHTML='<div class="watermark">LegendDetails.Blogspot.Com</div>';
+  if(!text)return;
 
-  // Image size syncing
-  const size=document.getElementById("imageSize").value;
-  let width=1024, ar='16/9';
-  if(size==='square'){width=1200; ar='1/1';}
-  if(size==='portrait'){width=900; ar='4/5';}
-  if(size==='landscape'){width=1024; ar='16/9';}
-  if(size==='hd'){width=1280; ar='16/9';}
-  preview.style.width=width+'px';
-  preview.style.aspectRatio=ar;
+  p.style.setProperty("--hc1",hc1.value);
+  p.style.setProperty("--hc2",hc2.value);
 
-  preview.style.borderColor=document.getElementById("borderColor").value;
+  const words=text.split(" ");
+  const hi=Math.floor(words.length/2);
+  const line=document.createElement("div");
+  line.className="quote-line";
 
-  // Clear previous
-  preview.innerHTML='<div class="watermark">LegendDetails.Blogspot.Com</div>';
-  if(!text) return;
-
-  const fontType=document.getElementById("fontType").value;
-  const wordSize=parseInt(document.getElementById("wordSize").value);
-  const highlightSize=parseInt(document.getElementById("highlightSize").value);
-  const wordColor="#ffffff";
-  const highlightColor=document.getElementById("highlightColor").value;
-  const wordShadow=document.getElementById("wordShadowColor").value;
-  const highlightShadow=document.getElementById("highlightShadowColor").value;
-
-  const langFont = langFonts[lang] || fontType;
-
-  const lines=text.split("\n");
-  lines.forEach(line=>{
-    const words=line.split(" ");
-    const highlightIndex=Math.floor(words.length/2);
-    const lineDiv=document.createElement("div");
-    lineDiv.className="quote-line";
-    words.forEach((word,i)=>{
-      const span=document.createElement("span");
-      span.textContent=word+" ";
-      span.style.fontFamily=langFont;
-      span.style.fontSize=(i===highlightIndex?highlightSize:wordSize)+"px";
-      span.style.color=(i===highlightIndex?highlightColor:wordColor);
-      span.style.textShadow=(i===highlightIndex?`2px 2px 4px ${highlightShadow}`:`2px 2px 2px ${wordShadow}`);
-      if(boldActive) span.style.fontWeight='700';
-      if(italicActive) span.style.fontStyle='italic';
-      span.className=i===highlightIndex?"highlight":"word";
-      lineDiv.appendChild(span);
-    });
-    preview.appendChild(lineDiv);
+  words.forEach((w,i)=>{
+    const s=document.createElement("span");
+    s.textContent=w+" ";
+    s.style.fontFamily=font;
+    s.style.fontSize=(i===hi?highlightSize.value:wordSize.value)+"px";
+    if(bold)s.style.fontWeight="700";
+    if(italic)s.style.fontStyle="italic";
+    s.className=i===hi?"highlight":"word";
+    line.appendChild(s);
   });
+  p.appendChild(line);
 }
 
-function setBackgroundImage(e){
-  const file=e.target.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=()=>{
-    bgImageURL=reader.result;
-    const preview=document.getElementById("preview");
-    preview.style.setProperty("--bg-image",`url(${bgImageURL})`);
-    preview.classList.add("image-mode");
-    renderQuote();
-  };
-  reader.readAsDataURL(file);
+function setBg(e){
+  const r=new FileReader();
+  r.onload=()=>{bgImg=r.result;preview.style.setProperty("--bg-image",`url(${bgImg})`);preview.classList.add("image-mode");renderQuote();}
+  r.readAsDataURL(e.target.files[0]);
 }
 
 function downloadImage(){
-  const name=document.getElementById("imageName").value||"legenddetails-quote";
-  html2canvas(document.getElementById("preview"),{scale:2,backgroundColor:null}).then(canvas=>{
-    const link=document.createElement("a");
-    link.download=name+".png";
-    link.href=canvas.toDataURL("image/png");
-    link.click();
+  const name=imageName.value||"legenddetails-quote";
+  html2canvas(preview,{scale:2}).then(c=>{
+    const a=document.createElement("a");
+    a.download=name+".jpg";
+    a.href=c.toDataURL("image/jpeg",0.95);
+    a.click();
   });
 }
 
