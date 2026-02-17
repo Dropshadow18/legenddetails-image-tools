@@ -1,171 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>LegendDetails – Premium Quote Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quote Image Studio Pro</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Noto+Sans+Telugu&family=Noto+Sans+Devanagari&family=Noto+Sans+Tamil&family=Noto+Sans+Kannada&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto+Slab:wght@400;700&family=Poppins:wght@400;700&family=Montserrat:wght@400;700&family=Noto+Serif+Telugu:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&family=Noto+Sans+Kannada:wght@400;700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
-body{
-font-family:Poppins,sans-serif;
-background:#f4f4f4;
+body{margin:0;background:#020617;color:#fff;font-family:Arial;}
+.container{max-width:1300px;margin:auto;padding:20px;}
+h1{text-align:center;margin-bottom:20px;}
+.controls{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+textarea, select, input, button{padding:10px;border-radius:6px;border:none;}
+textarea{min-height:130px;}
+button{background:#facc15;font-weight:700;cursor:pointer;}
+
+.preview-wrap{display:flex;justify-content:center;margin-top:25px;}
+.preview{
+width:1024px;
+aspect-ratio:16/9;
+padding:80px;
+border-radius:18px;
+display:flex;
+flex-direction:column;
+justify-content:center;
 text-align:center;
-margin:0;
-padding:0;
+box-sizing:border-box;
+position:relative;
+overflow:hidden;
+background:#111;
 }
-.container{
-width:92%;
-max-width:700px;
-margin:auto;
-padding:20px;
+.preview::before{
+content:"";
+position:absolute;
+inset:0;
+background-image:var(--bg-image);
+background-size:cover;
+background-position:center;
+opacity:0.45;
 }
-textarea{
-width:100%;
-height:110px;
-padding:12px;
-font-size:18px;
-border-radius:10px;
-border:1px solid #ccc;
-resize:none;
-}
-input,select,button{
-margin-top:10px;
-padding:10px;
-font-size:16px;
-border-radius:8px;
-border:none;
-}
-button{
-background:#000;
-color:#fff;
-cursor:pointer;
-}
-canvas{
-margin-top:20px;
-width:100%;
-max-width:600px;
-border-radius:16px;
-box-shadow:0 8px 25px rgba(0,0,0,0.3);
+.preview>*{position:relative;z-index:2;}
+.quote-line{margin-bottom:25px;line-height:1.3;word-break:break-word;}
+
+.highlight1{color:#facc15;}
+.highlight2{color:#ff4ecd;}
+.highlight3{color:#00eaff;}
+.highlight4{color:#00ff95;}
+
+.watermark{
+position:absolute;
+top:15px;
+right:20px;
+font-family:'Playfair Display';
+font-size:22px;
+color:rgba(255,255,255,0.45);
+z-index:5;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
+<h1>LegendDetails Premium Quote Studio</h1>
 
-<h2>Quote Image Studio</h2>
+<div class="controls">
+<textarea id="quoteText" placeholder="Use *word*  #word#  @word@  %word% for multi highlight" oninput="renderQuote()"></textarea>
 
-<textarea id="quote" placeholder="Type quote in any language..."></textarea><br>
+<label>Language</label>
+<select id="language" oninput="renderQuote()">
+<option value="en">English</option>
+<option value="te">Telugu</option>
+<option value="hi">Hindi</option>
+<option value="ta">Tamil</option>
+<option value="kn">Kannada</option>
+</select>
 
-<input type="file" id="bgUpload" accept="image/*"><br>
+<label>English Font</label>
+<select id="fontType" oninput="renderQuote()">
+<option value="Playfair Display">Playfair Display</option>
+<option value="Poppins">Poppins</option>
+<option value="Montserrat">Montserrat</option>
+<option value="Roboto Slab">Roboto Slab</option>
+</select>
 
-<select id="sizeSelect">
-<option value="blogger">Blogger Size (1000x1000)</option>
-<option value="pinterest">Pinterest Size (1000x1500)</option>
-</select><br>
+<label>Word Size</label>
+<input type="number" id="wordSize" value="56" min="10" max="300" oninput="renderQuote()">
 
-<input type="text" id="imgName" placeholder="Enter image name"><br>
+<label>Highlight Size</label>
+<input type="number" id="highlightSize" value="90" min="10" max="300" oninput="renderQuote()">
 
-<button onclick="generate()">Generate</button>
-<button onclick="download()">Download JPG</button>
+<input type="file" id="bgImage" accept="image/*" onchange="setBackgroundImage(event)">
 
-<br>
-<canvas id="canvas" width="1000" height="1000"></canvas>
+<label>Image Size</label>
+<select id="imageSize" oninput="renderQuote()">
+<option value="landscape">Landscape 1024×675</option>
+<option value="square">Square 1200×1200</option>
+<option value="portrait">Pinterest 1000×1500</option>
+<option value="hd">HD 1280×720</option>
+</select>
 
+<label>Image Name</label>
+<input type="text" id="imageName" value="legenddetails-quote">
+
+<button onclick="downloadImage()">Download JPG</button>
+</div>
+
+<div class="preview-wrap">
+<div class="preview" id="preview">
+<div class="watermark">LegendDetails.Blogspot.Com</div>
+</div>
+</div>
 </div>
 
 <script>
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+let bgImageURL="";
 
-function setSize(){
-let size=document.getElementById("sizeSelect").value;
-if(size==="pinterest"){
-canvas.width=1000;
-canvas.height=1500;
-}else{
-canvas.width=1000;
-canvas.height=1000;
-}
-}
-
-function getFont(text){
-if(/[ఀ-౿]/.test(text)) return "bold 60px Noto Sans Telugu";
-if(/[ऀ-ॿ]/.test(text)) return "bold 60px Noto Sans Devanagari";
-if(/[஀-௿]/.test(text)) return "bold 60px Noto Sans Tamil";
-if(/[೦-೿]/.test(text)) return "bold 60px Noto Sans Kannada";
-return "bold 64px Poppins";
-}
-
-function generate(){
-setSize();
-
-let text=document.getElementById("quote").value;
-let file=document.getElementById("bgUpload").files[0];
-
-if(file){
-let reader=new FileReader();
-reader.onload=function(e){
-let img=new Image();
-img.onload=function(){
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
-drawText(text);
+const langFonts={
+en:null,
+te:"Noto Serif Telugu",
+hi:"Noto Sans Devanagari",
+ta:"Noto Sans Tamil",
+kn:"Noto Sans Kannada"
 };
-img.src=e.target.result;
-};
-reader.readAsDataURL(file);
-}else{
-let grad=ctx.createLinearGradient(0,0,canvas.width,canvas.height);
-grad.addColorStop(0,"#ff512f");
-grad.addColorStop(1,"#dd2476");
-ctx.fillStyle=grad;
-ctx.fillRect(0,0,canvas.width,canvas.height);
-drawText(text);
+
+function renderQuote(){
+const text=quoteText.value.trim();
+const preview=document.getElementById("preview");
+const lang=language.value;
+
+let width=1024, ar='16/9';
+if(imageSize.value==='square'){width=1200;ar='1/1'}
+if(imageSize.value==='portrait'){width=1000;ar='2/3'}
+if(imageSize.value==='hd'){width=1280;ar='16/9'}
+
+preview.style.width=width+'px';
+preview.style.aspectRatio=ar;
+preview.innerHTML='<div class="watermark">LegendDetails.Blogspot.Com</div>';
+
+if(!text) return;
+
+const font=langFonts[lang]||fontType.value;
+const lines=text.split("\n");
+
+lines.forEach(line=>{
+const div=document.createElement("div");
+div.className="quote-line";
+
+let words=line.split(" ");
+
+words.forEach(w=>{
+let span=document.createElement("span");
+let clean=w.replace(/[*#@%]/g,'');
+
+span.textContent=clean+" ";
+span.style.fontFamily=font;
+
+if(w.startsWith("*") && w.endsWith("*")){
+span.className="highlight1";
+span.style.fontSize=highlightSize.value+"px";
 }
+else if(w.startsWith("#") && w.endsWith("#")){
+span.className="highlight2";
+span.style.fontSize=highlightSize.value+"px";
+}
+else if(w.startsWith("@") && w.endsWith("@")){
+span.className="highlight3";
+span.style.fontSize=highlightSize.value+"px";
+}
+else if(w.startsWith("%") && w.endsWith("%")){
+span.className="highlight4";
+span.style.fontSize=highlightSize.value+"px";
+}
+else{
+span.style.fontSize=wordSize.value+"px";
 }
 
-function drawText(text){
-ctx.textAlign="center";
-ctx.fillStyle="#fff";
-ctx.font=getFont(text);
+div.appendChild(span);
+});
 
-let words=text.split(" ");
-let line="";
-let lines=[];
-let maxWidth=canvas.width*0.8;
-
-for(let n=0;n<words.length;n++){
-let testLine=line+words[n]+" ";
-let metrics=ctx.measureText(testLine);
-if(metrics.width>maxWidth && n>0){
-lines.push(line);
-line=words[n]+" ";
-}else{
-line=testLine;
-}
-}
-lines.push(line);
-
-let lineHeight=70;
-let y=canvas.height/2-(lines.length/2)*lineHeight;
-
-for(let i=0;i<lines.length;i++){
-ctx.fillStyle=i%3==0?"#ffffff":i%3==1?"#ffe600":"#00ffd5";
-ctx.fillText(lines[i],canvas.width/2,y);
-y+=lineHeight;
-}
+preview.appendChild(div);
+});
 }
 
-function download(){
-let name=document.getElementById("imgName").value || "quote-image";
-let link=document.createElement("a");
-link.download=name+".jpg";
-link.href=canvas.toDataURL("image/jpeg",1.0);
-link.click();
+function setBackgroundImage(e){
+const r=new FileReader();
+r.onload=()=>{
+bgImageURL=r.result;
+preview.style.setProperty("--bg-image",`url(${bgImageURL})`);
+renderQuote();
 }
+r.readAsDataURL(e.target.files[0]);
+}
+
+function downloadImage(){
+const name=imageName.value||"legenddetails-quote";
+html2canvas(preview,{scale:2}).then(c=>{
+const a=document.createElement("a");
+a.download=name+".jpg";
+a.href=c.toDataURL("image/jpeg",0.95);
+a.click();
+});
+}
+
+renderQuote();
 </script>
-
 </body>
 </html>
