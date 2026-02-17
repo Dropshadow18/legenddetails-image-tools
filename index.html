@@ -2,91 +2,84 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LegendDetails – Premium Quote Studio</title>
+<title>LegendDetails Quote Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto+Slab:wght@400;700&family=Noto+Serif+Telugu:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&family=Noto+Sans+Kannada:wght@400;700&display=swap" rel="stylesheet">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
-body{margin:0;background:#020617;color:#fff;font-family:Arial,sans-serif;}
-.container{max-width:1300px;margin:auto;padding:20px;}
-h1{text-align:center;margin-bottom:20px;}
-.controls{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
-textarea, select, input[type="file"], input[type="number"], input[type="color"], button{padding:10px;border-radius:6px;border:none;}
-textarea{min-height:130px;}
-button{background:#facc15;font-weight:600;cursor:pointer;}
-.toggle-btn{padding:10px 15px;margin-top:5px;font-weight:600;cursor:pointer;}
+body{margin:0;background:#020617;color:#fff;font-family:Arial;}
+.container{max-width:1200px;margin:auto;padding:20px;}
+h1{text-align:center;margin-bottom:15px;}
 
-.preview-wrap{display:flex;justify-content:center;margin-top:25px;position:relative;}
+.controls{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+textarea,select,input,button{padding:10px;border-radius:6px;border:none;}
+textarea{min-height:120px;}
+button{background:#facc15;font-weight:600;cursor:pointer;}
+
+.presets{
+display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;
+}
+.preset-btn{
+background:#111827;color:#fff;border:1px solid #334155;
+padding:8px 12px;border-radius:20px;cursor:pointer;font-size:13px;
+}
+.preset-btn:hover{background:#facc15;color:#000;}
+
+.preview-wrap{display:flex;justify-content:center;margin-top:25px;}
 .preview{
-  width:1024px;
-  aspect-ratio:16/9;
-  padding:80px;
-  border-radius:18px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  text-align:center;
-  box-sizing:border-box;
-  position:relative;
-  overflow:hidden;
-  background:#111;
+width:1024px;
+aspect-ratio:16/9;
+padding:80px;
+border-radius:18px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+text-align:center;
+position:relative;
+overflow:hidden;
+background:#111;
 }
 .preview::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background-image:var(--bg-image);
-  background-size:cover;
-  background-position:center;
-  opacity:0.45;
-  z-index:0;
+content:"";
+position:absolute;inset:0;
+background-image:var(--bg-image);
+background-size:cover;background-position:center;
+opacity:0.45;z-index:0;
 }
 .preview>*{position:relative;z-index:1;}
-.quote-line{margin-bottom:28px;line-height:1.3;word-break:break-word;}
-.word{} .highlight{font-weight:700;}
-
-.rounded{border-radius:18px;}
-.circle{border-radius:50%;}
-.shadow{box-shadow:0 10px 30px rgba(0,0,0,0.6);}
-.outline{border:5px solid #facc15;}
-.solid{border-style:solid;}
-.dotted{border-style:dotted;}
-.dashed{border-style:dashed;}
-.double{border-style:double;}
-.groove{border-style:groove;}
-.ridge{border-style:ridge;}
-.inset{border-style:inset;}
-.outset{border-style:outset;}
+.quote-line{margin-bottom:25px;line-height:1.3;word-break:break-word;}
+.highlight{font-weight:700;}
 
 .watermark{
-  position:absolute;
-  top:15px;
-  right:20px;
-  font-family:'Playfair Display', serif;
-  font-size:22px;
-  font-weight:600;
-  color:rgba(255,255,255,0.45);
-  z-index:10;
+position:absolute;top:15px;right:20px;
+font-family:'Playfair Display',serif;
+font-size:20px;color:rgba(255,255,255,0.45);
 }
-
-.image-mode .word{text-shadow:2px 2px 4px rgba(0,0,0,0.8);}
-.image-mode .highlight{text-shadow:2px 2px 8px rgba(0,0,0,0.9);}
 </style>
 </head>
 
 <body>
 <div class="container">
-<h1>LegendDetails Premium Quote Studio</h1>
+<h1>LegendDetails Quote Studio</h1>
+
+<!-- PRESET BUTTONS -->
+<div class="presets">
+<button class="preset-btn" onclick="setPreset('success')">Success</button>
+<button class="preset-btn" onclick="setPreset('motivation')">Motivation</button>
+<button class="preset-btn" onclick="setPreset('life')">Life</button>
+<button class="preset-btn" onclick="setPreset('money')">Money</button>
+<button class="preset-btn" onclick="setPreset('attitude')">Attitude</button>
+<button class="preset-btn" onclick="setPreset('telugu')">Telugu</button>
+<button class="preset-btn" onclick="setPreset('hindi')">Hindi</button>
+<button class="preset-btn" onclick="setPreset('tamil')">Tamil</button>
+</div>
 
 <div class="controls">
 
-<textarea id="quoteText" placeholder="Paste quote here..." oninput="renderQuote()"></textarea>
+<textarea id="quoteText" placeholder="Type or use presets..." oninput="renderQuote()"></textarea>
 
-<label>Language</label>
 <select id="language" oninput="renderQuote()">
 <option value="en">English</option>
 <option value="te">Telugu</option>
@@ -95,69 +88,33 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 <option value="kn">Kannada</option>
 </select>
 
-<label>Font Family (English only)</label>
 <select id="fontType" oninput="renderQuote()">
-<option value="Playfair Display">Playfair Display</option>
+<option value="Playfair Display">Playfair</option>
 <option value="Roboto Slab">Roboto Slab</option>
-<option value="Arial, sans-serif">Arial</option>
+<option value="Arial">Arial</option>
 </select>
 
-<label>Word Size</label>
-<input type="number" id="wordSize" min="10" max="300" value="56" oninput="renderQuote()">
+<input type="number" id="wordSize" value="58" min="10" max="300" oninput="renderQuote()">
+<input type="number" id="highlightSize" value="90" min="10" max="300" oninput="renderQuote()">
 
-<label>Highlight Size</label>
-<input type="number" id="highlightSize" min="10" max="300" value="92" oninput="renderQuote()">
-
-<button class="toggle-btn" id="boldBtn">Bold</button>
-<button class="toggle-btn" id="italicBtn">Italic</button>
-
-<label>Text Shadow (Normal)</label>
-<input type="color" id="wordShadowColor" value="#000000" oninput="renderQuote()">
-
-<label>Text Shadow (Highlight)</label>
-<input type="color" id="highlightShadowColor" value="#000000" oninput="renderQuote()">
-
-<label>Special Word Color</label>
 <input type="color" id="highlightColor" value="#facc15" oninput="renderQuote()">
 
 <input type="file" id="bgImage" accept="image/*" onchange="setBackgroundImage(event)">
 
-<label>Image Size</label>
 <select id="imageSize" oninput="renderQuote()">
+<option value="landscape">Blog 1024×675</option>
 <option value="square">Square 1200×1200</option>
-<option value="portrait">Portrait 900×1125</option>
-<option value="landscape">Landscape 1024×675</option>
-<option value="hd">Full HD 1280×720</option>
+<option value="portrait">Pinterest 900×1125</option>
 </select>
 
-<label>Border Style</label>
-<select id="borderStyle" oninput="renderQuote()">
-<option value="rounded">Rounded</option>
-<option value="circle">Circle</option>
-<option value="shadow">Shadow</option>
-<option value="outline">Outline</option>
-<option value="solid">Solid</option>
-<option value="dotted">Dotted</option>
-<option value="dashed">Dashed</option>
-<option value="double">Double</option>
-<option value="groove">Groove</option>
-<option value="ridge">Ridge</option>
-<option value="inset">Inset</option>
-<option value="outset">Outset</option>
-</select>
-
-<label>Border Color</label>
-<input type="color" id="borderColor" value="#facc15" oninput="renderQuote()">
-
-<label>Image Name (Blogger)</label>
 <input type="text" id="imageName" value="legenddetails-quote">
 
-<button onclick="downloadImage()">Download</button>
+<button onclick="downloadImage()">Download JPG</button>
 
 </div>
 
 <div class="preview-wrap">
-<div class="preview rounded" id="preview">
+<div class="preview" id="preview">
 <div class="watermark">LegendDetails.Blogspot.Com</div>
 </div>
 </div>
@@ -165,82 +122,84 @@ button{background:#facc15;font-weight:600;cursor:pointer;}
 
 <script>
 let bgImageURL="";
-let boldActive=false, italicActive=false;
 
 const langFonts={
-  en:null,
-  te:"Noto Serif Telugu",
-  hi:"Noto Sans Devanagari",
-  ta:"Noto Sans Tamil",
-  kn:"Noto Sans Kannada"
+en:null,
+te:"Noto Serif Telugu",
+hi:"Noto Sans Devanagari",
+ta:"Noto Sans Tamil",
+kn:"Noto Sans Kannada"
 };
 
-boldBtn.onclick=()=>{boldActive=!boldActive;renderQuote();}
-italicBtn.onclick=()=>{italicActive=!italicActive;renderQuote();}
+function setPreset(type){
+const presets={
+success:"Success starts when excuses stop",
+motivation:"Push yourself because no one else will",
+life:"Life becomes beautiful when mindset changes",
+money:"Smart work builds wealth faster than hard work",
+attitude:"Your attitude decides your direction",
+telugu:"జీవితం మారాలంటే ఆలోచనలు మారాలి",
+hindi:"सफलता सोच बदलने से शुरू होती है",
+tamil:"வாழ்க்கை எண்ணம் மாறும் போது மாறும்"
+};
+quoteText.value=presets[type];
+renderQuote();
+}
 
 function renderQuote(){
-  const text=quoteText.value.trim();
-  const preview=document.getElementById("preview");
-  const lang=language.value;
+const text=quoteText.value.trim();
+const preview=document.getElementById("preview");
+const lang=language.value;
 
-  preview.className=`preview ${borderStyle.value}`;
-  if(bgImageURL) preview.classList.add("image-mode");
+let width=1024,ar='16/9';
+if(imageSize.value==='square'){width=1200;ar='1/1'}
+if(imageSize.value==='portrait'){width=900;ar='4/5'}
+preview.style.width=width+'px';
+preview.style.aspectRatio=ar;
 
-  let width=1024, ar='16/9';
-  if(imageSize.value==='square'){width=1200;ar='1/1'}
-  if(imageSize.value==='portrait'){width=900;ar='4/5'}
-  if(imageSize.value==='hd'){width=1280;ar='16/9'}
-  preview.style.width=width+'px';
-  preview.style.aspectRatio=ar;
-  preview.style.borderColor=borderColor.value;
+preview.innerHTML='<div class="watermark">LegendDetails.Blogspot.Com</div>';
+if(!text) return;
 
-  preview.innerHTML='<div class="watermark">LegendDetails.Blogspot.Com</div>';
-  if(!text) return;
+const font=langFonts[lang]||fontType.value;
+const lines=text.split("\n");
 
-  const font=langFonts[lang]||fontType.value;
-  const lines=text.split("\n");
+lines.forEach(line=>{
+const words=line.split(" ");
+const hi=Math.floor(words.length/2);
+const div=document.createElement("div");
+div.className="quote-line";
 
-  lines.forEach(line=>{
-    const words=line.split(" ");
-    const hi=Math.floor(words.length/2);
-    const div=document.createElement("div");
-    div.className="quote-line";
-
-    words.forEach((w,i)=>{
-      const s=document.createElement("span");
-      s.textContent=w+" ";
-      s.style.fontFamily=font;
-      s.style.fontSize=(i===hi?highlightSize.value:wordSize.value)+"px";
-      s.style.color=i===hi?highlightColor.value:"#fff";
-      s.style.textShadow=i===hi?`2px 2px 4px ${highlightShadowColor.value}`:`2px 2px 2px ${wordShadowColor.value}`;
-      if(boldActive)s.style.fontWeight="700";
-      if(italicActive)s.style.fontStyle="italic";
-      s.className=i===hi?"highlight":"word";
-      div.appendChild(s);
-    });
-    preview.appendChild(div);
-  });
+words.forEach((w,i)=>{
+const s=document.createElement("span");
+s.textContent=w+" ";
+s.style.fontFamily=font;
+s.style.fontSize=(i===hi?highlightSize.value:wordSize.value)+"px";
+s.style.color=i===hi?highlightColor.value:"#fff";
+if(i===hi)s.className="highlight";
+div.appendChild(s);
+});
+preview.appendChild(div);
+});
 }
 
 function setBackgroundImage(e){
-  const r=new FileReader();
-  r.onload=()=>{
-    bgImageURL=r.result;
-    preview.style.setProperty("--bg-image",`url(${bgImageURL})`);
-    preview.classList.add("image-mode");
-    renderQuote();
-  }
-  r.readAsDataURL(e.target.files[0]);
+const r=new FileReader();
+r.onload=()=>{
+bgImageURL=r.result;
+preview.style.setProperty("--bg-image",`url(${bgImageURL})`);
+renderQuote();
+}
+r.readAsDataURL(e.target.files[0]);
 }
 
 function downloadImage(){
-  const name=imageName.value||"legenddetails-quote";
-  html2canvas(preview,{scale:2,backgroundColor:"#000"}).then(c=>{
-    const a=document.createElement("a");
-    a.download=name+".jpg";
-    a.href=c.toDataURL("image/jpeg",0.95);
-    a.click();
-  });
+const name=imageName.value||"legenddetails-quote";
+html2canvas(preview,{scale:2,backgroundColor:"#000"}).then(c=>{
+const a=document.createElement("a");
+a.download=name+".jpg";
+a.href=c.toDataURL("image/jpeg",0.95);
+a.click();
+});
 }
 
 renderQuote();
