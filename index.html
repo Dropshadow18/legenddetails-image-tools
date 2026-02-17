@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LegendDetails Quote Studio</title>
+<title>LegendDetails Auto Quote Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto+Slab:wght@400;700&family=Noto+Serif+Telugu:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&family=Noto+Sans+Kannada:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto+Slab:wght@700&family=Noto+Serif+Telugu:wght@700&family=Noto+Sans+Devanagari:wght@700&family=Noto+Sans+Tamil:wght@700&family=Noto+Sans+Kannada:wght@700&display=swap" rel="stylesheet">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
@@ -14,18 +15,9 @@ body{margin:0;background:#020617;color:#fff;font-family:Arial;}
 h1{text-align:center;margin-bottom:15px;}
 
 .controls{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
-textarea,select,input,button{padding:10px;border-radius:6px;border:none;}
+textarea,input,select,button{padding:10px;border-radius:6px;border:none;}
 textarea{min-height:120px;}
 button{background:#facc15;font-weight:600;cursor:pointer;}
-
-.presets{
-display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;
-}
-.preset-btn{
-background:#111827;color:#fff;border:1px solid #334155;
-padding:8px 12px;border-radius:20px;cursor:pointer;font-size:13px;
-}
-.preset-btn:hover{background:#facc15;color:#000;}
 
 .preview-wrap{display:flex;justify-content:center;margin-top:25px;}
 .preview{
@@ -36,49 +28,53 @@ border-radius:18px;
 display:flex;
 flex-direction:column;
 justify-content:center;
+align-items:center;
 text-align:center;
 position:relative;
 overflow:hidden;
 background:#111;
 }
+
 .preview::before{
 content:"";
 position:absolute;inset:0;
 background-image:var(--bg-image);
-background-size:cover;background-position:center;
-opacity:0.45;z-index:0;
+background-size:cover;
+background-position:center;
+opacity:0.45;
+z-index:0;
 }
+
 .preview>*{position:relative;z-index:1;}
-.quote-line{margin-bottom:25px;line-height:1.3;word-break:break-word;}
-.highlight{font-weight:700;}
+
+.line{margin:10px 0;font-weight:700;letter-spacing:.5px;}
+.big{font-size:95px;}
+.mid{font-size:60px;}
+.small{font-size:38px;}
+
+.c1{color:#ffffff;}
+.c2{color:#facc15;}
+.c3{color:#38bdf8;}
+.c4{color:#fb7185;}
+.c5{color:#4ade80;}
 
 .watermark{
-position:absolute;top:15px;right:20px;
+position:absolute;
+top:15px;
+right:20px;
 font-family:'Playfair Display',serif;
-font-size:20px;color:rgba(255,255,255,0.45);
+font-size:20px;
+color:rgba(255,255,255,0.5);
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-<h1>LegendDetails Quote Studio</h1>
-
-<!-- PRESET BUTTONS -->
-<div class="presets">
-<button class="preset-btn" onclick="setPreset('success')">Success</button>
-<button class="preset-btn" onclick="setPreset('motivation')">Motivation</button>
-<button class="preset-btn" onclick="setPreset('life')">Life</button>
-<button class="preset-btn" onclick="setPreset('money')">Money</button>
-<button class="preset-btn" onclick="setPreset('attitude')">Attitude</button>
-<button class="preset-btn" onclick="setPreset('telugu')">Telugu</button>
-<button class="preset-btn" onclick="setPreset('hindi')">Hindi</button>
-<button class="preset-btn" onclick="setPreset('tamil')">Tamil</button>
-</div>
+<h1>LegendDetails Auto Quote Designer</h1>
 
 <div class="controls">
-
-<textarea id="quoteText" placeholder="Type or use presets..." oninput="renderQuote()"></textarea>
+<textarea id="quoteText" placeholder="Paste quote..." oninput="renderQuote()"></textarea>
 
 <select id="language" oninput="renderQuote()">
 <option value="en">English</option>
@@ -88,29 +84,16 @@ font-size:20px;color:rgba(255,255,255,0.45);
 <option value="kn">Kannada</option>
 </select>
 
-<select id="fontType" oninput="renderQuote()">
-<option value="Playfair Display">Playfair</option>
-<option value="Roboto Slab">Roboto Slab</option>
-<option value="Arial">Arial</option>
-</select>
-
-<input type="number" id="wordSize" value="58" min="10" max="300" oninput="renderQuote()">
-<input type="number" id="highlightSize" value="90" min="10" max="300" oninput="renderQuote()">
-
-<input type="color" id="highlightColor" value="#facc15" oninput="renderQuote()">
-
-<input type="file" id="bgImage" accept="image/*" onchange="setBackgroundImage(event)">
+<input type="file" accept="image/*" onchange="setBackgroundImage(event)">
 
 <select id="imageSize" oninput="renderQuote()">
-<option value="landscape">Blog 1024×675</option>
-<option value="square">Square 1200×1200</option>
-<option value="portrait">Pinterest 900×1125</option>
+<option value="blog">Blog 1024×675</option>
+<option value="square">Square</option>
+<option value="portrait">Pinterest</option>
 </select>
 
 <input type="text" id="imageName" value="legenddetails-quote">
-
 <button onclick="downloadImage()">Download JPG</button>
-
 </div>
 
 <div class="preview-wrap">
@@ -124,27 +107,14 @@ font-size:20px;color:rgba(255,255,255,0.45);
 let bgImageURL="";
 
 const langFonts={
-en:null,
+en:"Playfair Display",
 te:"Noto Serif Telugu",
 hi:"Noto Sans Devanagari",
 ta:"Noto Sans Tamil",
 kn:"Noto Sans Kannada"
 };
 
-function setPreset(type){
-const presets={
-success:"Success starts when excuses stop",
-motivation:"Push yourself because no one else will",
-life:"Life becomes beautiful when mindset changes",
-money:"Smart work builds wealth faster than hard work",
-attitude:"Your attitude decides your direction",
-telugu:"జీవితం మారాలంటే ఆలోచనలు మారాలి",
-hindi:"सफलता सोच बदलने से शुरू होती है",
-tamil:"வாழ்க்கை எண்ணம் மாறும் போது மாறும்"
-};
-quoteText.value=presets[type];
-renderQuote();
-}
+const colors=["c1","c2","c3","c4","c5"];
 
 function renderQuote(){
 const text=quoteText.value.trim();
@@ -160,24 +130,29 @@ preview.style.aspectRatio=ar;
 preview.innerHTML='<div class="watermark">LegendDetails.Blogspot.Com</div>';
 if(!text) return;
 
-const font=langFonts[lang]||fontType.value;
-const lines=text.split("\n");
+preview.style.fontFamily=langFonts[lang];
 
-lines.forEach(line=>{
-const words=line.split(" ");
-const hi=Math.floor(words.length/2);
+const words=text.split(" ");
+const total=words.length;
+
+let line1=words.slice(0,Math.ceil(total/3)).join(" ");
+let line2=words.slice(Math.ceil(total/3),Math.ceil(total*2/3)).join(" ");
+let line3=words.slice(Math.ceil(total*2/3)).join(" ");
+
+const lines=[line1,line2,line3];
+
+lines.forEach((l,i)=>{
+if(!l) return;
 const div=document.createElement("div");
-div.className="quote-line";
+div.className="line";
 
-words.forEach((w,i)=>{
-const s=document.createElement("span");
-s.textContent=w+" ";
-s.style.fontFamily=font;
-s.style.fontSize=(i===hi?highlightSize.value:wordSize.value)+"px";
-s.style.color=i===hi?highlightColor.value:"#fff";
-if(i===hi)s.className="highlight";
-div.appendChild(s);
-});
+if(i==1) div.classList.add("big");
+else if(i==0) div.classList.add("mid");
+else div.classList.add("small");
+
+div.classList.add(colors[Math.floor(Math.random()*colors.length)]);
+div.textContent=l;
+
 preview.appendChild(div);
 });
 }
