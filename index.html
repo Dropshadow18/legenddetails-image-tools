@@ -2,182 +2,187 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LegendDetails Auto Quote Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quote Image Studio</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto+Slab:wght@700&family=Noto+Serif+Telugu:wght@700&family=Noto+Sans+Devanagari:wght@700&family=Noto+Sans+Tamil:wght@700&family=Noto+Sans+Kannada:wght@700&display=swap" rel="stylesheet">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Noto+Sans+Telugu&family=Noto+Sans+Devanagari&family=Noto+Sans+Tamil&family=Noto+Sans+Kannada&display=swap" rel="stylesheet">
 
 <style>
-body{margin:0;background:#020617;color:#fff;font-family:Arial;}
-.container{max-width:1200px;margin:auto;padding:20px;}
-h1{text-align:center;margin-bottom:15px;}
-
-.controls{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
-textarea,input,select,button{padding:10px;border-radius:6px;border:none;}
-textarea{min-height:120px;}
-button{background:#facc15;font-weight:600;cursor:pointer;}
-
-.preview-wrap{display:flex;justify-content:center;margin-top:25px;}
-.preview{
-width:1024px;
-aspect-ratio:16/9;
-padding:80px;
-border-radius:18px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
+body{
+margin:0;
+padding:0;
+font-family:Poppins,sans-serif;
+background:#f2f2f2;
 text-align:center;
+}
+
+h2{
+margin-top:20px;
+}
+
+.container{
+width:90%;
+max-width:700px;
+margin:auto;
+}
+
+textarea{
+width:100%;
+height:120px;
+font-size:18px;
+padding:12px;
+border-radius:10px;
+border:1px solid #ccc;
+outline:none;
+resize:none;
+}
+
+select,button{
+margin-top:10px;
+padding:10px 14px;
+font-size:16px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+}
+
+button{
+background:#000;
+color:#fff;
+}
+
+.canvasBox{
+margin-top:20px;
 position:relative;
-overflow:hidden;
-background:#111;
 }
 
-.preview::before{
-content:"";
-position:absolute;inset:0;
-background-image:var(--bg-image);
-background-size:cover;
-background-position:center;
-opacity:0.45;
-z-index:0;
-}
-
-.preview>*{position:relative;z-index:1;}
-
-.line{margin:10px 0;font-weight:700;letter-spacing:.5px;}
-.big{font-size:95px;}
-.mid{font-size:60px;}
-.small{font-size:38px;}
-
-.c1{color:#ffffff;}
-.c2{color:#facc15;}
-.c3{color:#38bdf8;}
-.c4{color:#fb7185;}
-.c5{color:#4ade80;}
-
-.watermark{
-position:absolute;
-top:15px;
-right:20px;
-font-family:'Playfair Display',serif;
-font-size:20px;
-color:rgba(255,255,255,0.5);
+canvas{
+width:100%;
+max-width:600px;
+border-radius:18px;
+box-shadow:0 8px 25px rgba(0,0,0,0.2);
 }
 </style>
 </head>
 
 <body>
+
 <div class="container">
-<h1>LegendDetails Auto Quote Designer</h1>
 
-<div class="controls">
-<textarea id="quoteText" placeholder="Paste quote..." oninput="renderQuote()"></textarea>
+<h2>Quote Image Studio</h2>
 
-<select id="language" oninput="renderQuote()">
-<option value="en">English</option>
-<option value="te">Telugu</option>
-<option value="hi">Hindi</option>
-<option value="ta">Tamil</option>
-<option value="kn">Kannada</option>
+<textarea id="quoteInput" placeholder="Type quote in Telugu, English, Hindi, Tamil, Kannada..."></textarea>
+
+<br>
+
+<select id="styleSelect">
+<option value="style1">Style 1 Premium Gradient</option>
+<option value="style2">Style 2 Gold Luxury</option>
+<option value="style3">Style 3 Color Pop</option>
 </select>
 
-<input type="file" accept="image/*" onchange="setBackgroundImage(event)">
+<br>
+<button onclick="generate()">Generate Image</button>
+<button onclick="download()">Download JPG</button>
 
-<select id="imageSize" oninput="renderQuote()">
-<option value="blog">Blog 1024×675</option>
-<option value="square">Square</option>
-<option value="portrait">Pinterest</option>
-</select>
-
-<input type="text" id="imageName" value="legenddetails-quote">
-<button onclick="downloadImage()">Download JPG</button>
+<div class="canvasBox">
+<canvas id="canvas" width="600" height="600"></canvas>
 </div>
 
-<div class="preview-wrap">
-<div class="preview" id="preview">
-<div class="watermark">LegendDetails.Blogspot.Com</div>
-</div>
-</div>
 </div>
 
 <script>
-let bgImageURL="";
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
-const langFonts={
-en:"Playfair Display",
-te:"Noto Serif Telugu",
-hi:"Noto Sans Devanagari",
-ta:"Noto Sans Tamil",
-kn:"Noto Sans Kannada"
-};
-
-const colors=["c1","c2","c3","c4","c5"];
-
-function renderQuote(){
-const text=quoteText.value.trim();
-const preview=document.getElementById("preview");
-const lang=language.value;
-
-let width=1024,ar='16/9';
-if(imageSize.value==='square'){width=1200;ar='1/1'}
-if(imageSize.value==='portrait'){width=900;ar='4/5'}
-preview.style.width=width+'px';
-preview.style.aspectRatio=ar;
-
-preview.innerHTML='<div class="watermark">LegendDetails.Blogspot.Com</div>';
-if(!text) return;
-
-preview.style.fontFamily=langFonts[lang];
-
-const words=text.split(" ");
-const total=words.length;
-
-let line1=words.slice(0,Math.ceil(total/3)).join(" ");
-let line2=words.slice(Math.ceil(total/3),Math.ceil(total*2/3)).join(" ");
-let line3=words.slice(Math.ceil(total*2/3)).join(" ");
-
-const lines=[line1,line2,line3];
-
-lines.forEach((l,i)=>{
-if(!l) return;
-const div=document.createElement("div");
-div.className="line";
-
-if(i==1) div.classList.add("big");
-else if(i==0) div.classList.add("mid");
-else div.classList.add("small");
-
-div.classList.add(colors[Math.floor(Math.random()*colors.length)]);
-div.textContent=l;
-
-preview.appendChild(div);
-});
+function getFont(text){
+if(/[ఀ-౿]/.test(text)) return "bold 42px Noto Sans Telugu";
+if(/[ऀ-ॿ]/.test(text)) return "bold 42px Noto Sans Devanagari";
+if(/[஀-௿]/.test(text)) return "bold 42px Noto Sans Tamil";
+if(/[೦-೿]/.test(text)) return "bold 42px Noto Sans Kannada";
+return "bold 44px Poppins";
 }
 
-function setBackgroundImage(e){
-const r=new FileReader();
-r.onload=()=>{
-bgImageURL=r.result;
-preview.style.setProperty("--bg-image",`url(${bgImageURL})`);
-renderQuote();
-}
-r.readAsDataURL(e.target.files[0]);
+function generate(){
+let text=document.getElementById("quoteInput").value;
+let style=document.getElementById("styleSelect").value;
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+if(style==="style1"){
+let grad=ctx.createLinearGradient(0,0,600,600);
+grad.addColorStop(0,"#ff512f");
+grad.addColorStop(1,"#dd2476");
+ctx.fillStyle=grad;
+ctx.fillRect(0,0,600,600);
 }
 
-function downloadImage(){
-const name=imageName.value||"legenddetails-quote";
-html2canvas(preview,{scale:2,backgroundColor:"#000"}).then(c=>{
-const a=document.createElement("a");
-a.download=name+".jpg";
-a.href=c.toDataURL("image/jpeg",0.95);
-a.click();
-});
+if(style==="style2"){
+ctx.fillStyle="#111";
+ctx.fillRect(0,0,600,600);
 }
 
-renderQuote();
+if(style==="style3"){
+let grad=ctx.createLinearGradient(0,0,600,0);
+grad.addColorStop(0,"#00c6ff");
+grad.addColorStop(0.5,"#ff00cc");
+grad.addColorStop(1,"#ffcc00");
+ctx.fillStyle=grad;
+ctx.fillRect(0,0,600,600);
+}
+
+ctx.textAlign="center";
+ctx.textBaseline="middle";
+ctx.fillStyle="#fff";
+
+let font=getFont(text);
+ctx.font=font;
+
+wrapText(text,300,300,500,50,style);
+}
+
+function wrapText(text,x,y,maxWidth,lineHeight,style){
+let words=text.split(" ");
+let line="";
+let lines=[];
+
+for(let n=0;n<words.length;n++){
+let testLine=line+words[n]+" ";
+let metrics=ctx.measureText(testLine);
+let testWidth=metrics.width;
+
+if(testWidth>maxWidth && n>0){
+lines.push(line);
+line=words[n]+" ";
+}else{
+line=testLine;
+}
+}
+lines.push(line);
+
+let startY=y-(lines.length/2)*lineHeight;
+
+for(let i=0;i<lines.length;i++){
+
+if(style==="style3"){
+ctx.fillStyle=i%3===0?"#ffffff":i%3===1?"#ffe600":"#00ffd5";
+}
+
+if(style==="style2"){
+ctx.fillStyle="#FFD700";
+}
+
+ctx.fillText(lines[i],x,startY+i*lineHeight);
+}
+}
+
+function download(){
+let link=document.createElement("a");
+link.download="quote.jpg";
+link.href=canvas.toDataURL("image/jpeg",1.0);
+link.click();
+}
 </script>
+
 </body>
 </html>
